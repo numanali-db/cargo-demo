@@ -1,0 +1,17 @@
+command: ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+env:
+  - name: DATABRICKS_WAREHOUSE_ID
+    value: "410652ea4402d5bf"
+  - name: CATALOG
+    value: "serverless_nal_catalog"
+  - name: LLM_ENDPOINT
+    value: "databricks-claude-sonnet-4-6"
+  - name: VS_ENDPOINT
+    value: "nalvs"
+  - name: VS_INDEX
+    value: "serverless_nal_catalog.cargo_ai.knowledge_base_index"
+  - name: GENIE_SPACE_ID
+    value: "01f14df56bd21782be011a99ee0c80d2"
+  - name: AGENT_ENDPOINT
+    value: "cargo-yield-agent"

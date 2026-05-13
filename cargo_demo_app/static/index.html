@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virgin Atlantic Cargo Yield Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --va-red: #E10A0A;
+  --va-red-deep: #B00808;
+  --va-purple: #6E1A5C;
+  --db-lava: #FF3621;
+  --db-ink: #0B2026;
+  --db-oat: #F9F7F4;
+  --ink: #0B2026;
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-300: #D1D5DB;
+  --gray-500: #6B7280;
+  --gray-700: #374151;
+  --gray-900: #111827;
+  --green: #10B981;
+  --amber: #F59E0B;
+  --red: #EF4444;
+  --blue: #3B82F6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', -apple-system, system-ui, sans-serif; color: var(--ink); background: var(--gray-50); font-size: 14px; line-height: 1.5; }
+.mono { font-family: 'DM Mono', ui-monospace, monospace; }
+header {
+  background: linear-gradient(135deg, var(--va-red) 0%, var(--va-purple) 100%);
+  color: white;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+header .logo {
+  background: white;
+  color: var(--va-red);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+header h1 { font-size: 18px; font-weight: 600; flex: 1; }
+header .badge {
+  background: rgba(255,255,255,0.18);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+header .powered {
+  font-size: 11px;
+  opacity: 0.85;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tabs {
+  background: white;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  padding: 0 24px;
+}
+.tab {
+  padding: 14px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-500);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--va-red); border-bottom-color: var(--va-red); }
+main { padding: 24px; max-width: 1600px; margin: 0 auto; }
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.kpi-card {
+  background: white;
+  border-radius: 8px;
+  padding: 18px 20px;
+  border: 1px solid var(--gray-200);
+}
+.kpi-card .label { font-size: 11px; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-bottom: 6px; }
+.kpi-card .value { font-size: 26px; font-weight: 700; color: var(--ink); }
+.kpi-card .delta { font-size: 12px; margin-top: 4px; }
+.kpi-card .delta.up { color: var(--green); }
+.kpi-card .delta.down { color: var(--red); }
+.panel { background: white; border-radius: 8px; border: 1px solid var(--gray-200); margin-bottom: 16px; }
+.panel-header { padding: 14px 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
+.panel-header h2 { font-size: 14px; font-weight: 600; }
+.panel-body { padding: 8px 0; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-size: 11px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; padding: 10px 16px; letter-spacing: 0.04em; border-bottom: 1px solid var(--gray-200); }
+td { padding: 12px 16px; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
+tr:hover { background: var(--gray-50); cursor: pointer; }
+tr.selected { background: rgba(225,10,10,0.05); }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+.tag.platinum { background: #1F2937; color: white; }
+.tag.gold { background: #FEF3C7; color: #92400E; }
+.tag.silver { background: var(--gray-200); color: var(--gray-700); }
+.tag.bronze { background: #FED7AA; color: #92400E; }
+.tag.standard { background: var(--gray-100); color: var(--gray-700); }
+.tag.premium { background: rgba(225,10,10,0.1); color: var(--va-red); }
+.tag.specialist { background: rgba(110,26,92,0.1); color: var(--va-purple); }
+.tag.urgent { background: var(--red); color: white; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.6 } }
+
+.detail-pane { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; }
+.split-pane { display: grid; grid-template-columns: 1fr 1.6fr; gap: 16px; }
+.rfq-detail { background: white; border-radius: 8px; border: 1px solid var(--gray-200); padding: 20px; }
+.rfq-detail h3 { font-size: 12px; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px; }
+.detail-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--gray-100); }
+.detail-row .key { color: var(--gray-500); }
+.detail-row .val { font-weight: 500; }
+
+.btn { background: var(--va-red); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+.btn:hover { background: var(--va-red-deep); }
+.btn:disabled { background: var(--gray-300); cursor: not-allowed; }
+.btn.secondary { background: white; color: var(--ink); border: 1px solid var(--gray-300); }
+.btn.secondary:hover { background: var(--gray-50); }
+.btn.approve { background: var(--green); }
+.btn.approve:hover { background: #059669; }
+
+.agent-trace { background: white; border-radius: 8px; border: 1px solid var(--gray-200); padding: 0; }
+.trace-step { padding: 14px 20px; border-bottom: 1px solid var(--gray-100); }
+.trace-step:last-child { border-bottom: none; }
+.trace-step .step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.trace-step .step-icon { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.trace-step .step-icon.done { background: var(--green); color: white; }
+.trace-step .step-icon.failed { background: var(--red); color: white; }
+.trace-step .step-icon.running { background: var(--blue); color: white; animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+.trace-step .step-name { font-weight: 600; font-size: 13px; flex: 1; }
+.trace-step .step-duration { font-size: 11px; color: var(--gray-500); font-family: 'DM Mono', monospace; }
+.trace-step .step-body { padding-left: 32px; font-size: 12px; color: var(--gray-700); }
+.trace-step .step-body .kv { display: flex; gap: 12px; padding: 2px 0; }
+.trace-step .step-body .kv .k { color: var(--gray-500); min-width: 140px; }
+.trace-step .step-body .kv .v { color: var(--ink); font-family: 'DM Mono', monospace; font-size: 11.5px; }
+
+.quote-card { background: linear-gradient(135deg, var(--va-red) 0%, var(--va-purple) 100%); color: white; border-radius: 8px; padding: 20px; }
+.quote-card .title { font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.quote-card .rate { font-size: 36px; font-weight: 800; line-height: 1; }
+.quote-card .rate small { font-size: 14px; opacity: 0.85; font-weight: 500; }
+.quote-card .revenue { margin-top: 8px; font-size: 14px; opacity: 0.95; }
+.quote-card .meta { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px; }
+.quote-card .meta .k { opacity: 0.8; }
+.quote-card .meta .v { font-weight: 600; }
+.quote-card .actions { margin-top: 18px; display: flex; gap: 8px; }
+.quote-card .btn { background: white; color: var(--va-red); flex: 1; }
+.quote-card .btn:hover { background: var(--gray-100); }
+.quote-card .btn.secondary { background: rgba(255,255,255,0.18); color: white; border: 1px solid rgba(255,255,255,0.3); }
+.quote-card .btn.secondary:hover { background: rgba(255,255,255,0.3); }
+
+.rationale {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--gray-200);
+  padding: 20px;
+  font-size: 13px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+.rationale h4 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--gray-700); }
+
+.empty { padding: 40px; text-align: center; color: var(--gray-500); }
+.loading { padding: 40px; text-align: center; color: var(--gray-500); }
+.spinner { display: inline-block; width: 22px; height: 22px; border: 3px solid var(--gray-200); border-top-color: var(--va-red); border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+.chart { padding: 16px 20px; }
+.bar-chart { display: flex; gap: 6px; align-items: flex-end; height: 160px; padding-bottom: 8px; border-bottom: 1px solid var(--gray-200); }
+.bar { flex: 1; background: linear-gradient(180deg, var(--va-red) 0%, var(--va-purple) 100%); border-radius: 4px 4px 0 0; min-height: 2px; position: relative; }
+.bar:hover::after {
+  content: attr(data-tooltip);
+  position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+  background: var(--ink); color: white; padding: 4px 8px; border-radius: 4px;
+  font-size: 11px; white-space: nowrap; font-family: 'DM Mono', monospace;
+}
+.bar-labels { display: flex; gap: 6px; padding-top: 6px; }
+.bar-label { flex: 1; text-align: center; font-size: 10px; color: var(--gray-500); }
+
+.notes-banner { background: #FEF3C7; border-left: 3px solid var(--amber); padding: 10px 14px; margin-top: 12px; font-size: 12px; color: #92400E; border-radius: 4px; }
+
+/* Genie chat */
+.genie-shell { display: grid; grid-template-rows: auto 1fr auto; height: calc(100vh - 200px); max-height: 800px; background: white; border-radius: 8px; border: 1px solid var(--gray-200); overflow: hidden; }
+.genie-header { padding: 14px 20px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 12px; }
+.genie-header .icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--va-red) 0%, var(--va-purple) 100%);
+  color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;
+}
+.genie-header .title { font-size: 14px; font-weight: 600; }
+.genie-header .subtitle { font-size: 11px; color: var(--gray-500); font-family: 'DM Mono', monospace; }
+.genie-header .new-conv { margin-left: auto; }
+.genie-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+.sample-chips { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 8px; }
+.sample-chip { background: var(--gray-100); color: var(--gray-700); padding: 6px 12px; border-radius: 16px; font-size: 12px; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+.sample-chip:hover { background: rgba(225,10,10,0.08); color: var(--va-red); border-color: var(--va-red); }
+.msg { display: flex; gap: 10px; align-items: flex-start; }
+.msg .avatar { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+.msg.user .avatar { background: var(--ink); color: white; }
+.msg.assistant .avatar { background: linear-gradient(135deg, var(--va-red) 0%, var(--va-purple) 100%); color: white; }
+.msg .content { flex: 1; }
+.msg.user .content { background: var(--gray-50); padding: 10px 14px; border-radius: 12px; font-size: 13px; }
+.msg.assistant .content { font-size: 13px; }
+.msg .author { font-size: 11px; color: var(--gray-500); font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.msg-text { margin-bottom: 12px; line-height: 1.65; }
+.sql-block { background: #0B2026; color: #F9F7F4; padding: 12px 14px; border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 11.5px; overflow-x: auto; margin-bottom: 12px; white-space: pre; }
+.sql-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 10px; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.05em; }
+.result-table-wrap { border: 1px solid var(--gray-200); border-radius: 6px; overflow: auto; max-height: 320px; margin-bottom: 12px; }
+.result-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.result-table th { position: sticky; top: 0; background: var(--gray-50); padding: 8px 12px; font-size: 10px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+.result-table td { padding: 6px 12px; border-bottom: 1px solid var(--gray-100); white-space: nowrap; font-family: 'DM Mono', monospace; font-size: 11.5px; }
+.result-table td:first-child { font-family: 'Inter', sans-serif; }
+.result-meta { font-size: 11px; color: var(--gray-500); margin-bottom: 8px; }
+.genie-footer { padding: 16px 20px; border-top: 1px solid var(--gray-200); }
+.genie-input-row { display: flex; gap: 8px; }
+.genie-input { flex: 1; padding: 11px 14px; border: 1px solid var(--gray-300); border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+.genie-input:focus { border-color: var(--va-red); }
+.genie-input:disabled { background: var(--gray-50); cursor: not-allowed; }
+.genie-thinking { display: flex; align-items: center; gap: 8px; padding: 8px 0; color: var(--gray-500); font-size: 12px; }
+.thinking-dots { display: flex; gap: 3px; }
+.thinking-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--va-red); animation: pulse-dot 1.4s infinite; }
+.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse-dot { 0%,60%,100% { opacity: 0.3 } 30% { opacity: 1 } }
+.sql-toggle { font-size: 11px; color: var(--gray-500); cursor: pointer; padding: 4px 0; user-select: none; }
+.sql-toggle:hover { color: var(--va-red); }
+
+/* ===== Business Case tab ===== */
+.bc-hero {
+  background: linear-gradient(135deg, var(--va-red) 0%, var(--va-purple) 100%);
+  color: white;
+  border-radius: 12px;
+  padding: 28px 32px;
+  margin-bottom: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.bc-hero::before {
+  content: '';
+  position: absolute;
+  top: -50px; right: -50px;
+  width: 200px; height: 200px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+.bc-hero h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; position: relative; }
+.bc-hero p { opacity: 0.95; font-size: 14px; line-height: 1.55; position: relative; max-width: 900px; }
+.bc-hero .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 24px; position: relative; }
+.bc-hero .stat { border-left: 2px solid rgba(255,255,255,0.3); padding-left: 16px; }
+.bc-hero .stat .v { font-size: 26px; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.bc-hero .stat .l { font-size: 11px; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px; }
+
+.bc-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+.bc-card { background: white; border: 1px solid var(--gray-200); border-radius: 8px; padding: 22px 24px; margin-bottom: 16px; }
+.bc-card h3 { font-size: 11px; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; font-weight: 600; }
+.bc-card h2 { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+
+/* Animated counter */
+.counter { font-variant-numeric: tabular-nums; }
+
+/* Value waterfall */
+.waterfall { padding: 0; }
+.wf-row { display: grid; grid-template-columns: 120px 1fr 80px; gap: 12px; align-items: center; padding: 8px 0; }
+.wf-row .lbl { font-size: 12px; color: var(--gray-700); }
+.wf-row .bar-track { background: var(--gray-100); height: 22px; border-radius: 4px; overflow: hidden; position: relative; }
+.wf-row .bar-fill { height: 100%; background: linear-gradient(90deg, var(--va-red) 0%, var(--va-purple) 100%); border-radius: 4px; transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); width: 0%; }
+.wf-row .bar-fill.cost { background: linear-gradient(90deg, var(--gray-500) 0%, var(--ink) 100%); }
+.wf-row .amt { font-size: 13px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ROI mega-number */
+.roi-card { text-align: center; padding: 32px 24px; background: linear-gradient(135deg, #FFFFFF 0%, #FFF5F5 100%); border: 1px solid rgba(225,10,10,0.15); }
+.roi-card .label { font-size: 11px; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.roi-card .number {
+  font-size: 64px; font-weight: 800; line-height: 1; margin: 8px 0; font-variant-numeric: tabular-nums;
+  background: linear-gradient(135deg, var(--va-red) 0%, var(--va-purple) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.roi-card .number .x { font-size: 32px; }
+.roi-card .sub { font-size: 12px; color: var(--gray-700); margin-top: 4px; }
+
+/* Comparison table */
+.compare-table { width: 100%; margin-top: 4px; }
+.compare-table th { font-size: 11px; color: var(--gray-500); text-transform: uppercase; padding: 10px 12px; text-align: left; font-weight: 600; letter-spacing: 0.04em; border-bottom: 1px solid var(--gray-200); }
+.compare-table th.us { color: var(--va-red); }
+.compare-table th.them { color: var(--gray-500); }
+.compare-table td { padding: 11px 12px; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
+.compare-table td.us { background: rgba(225,10,10,0.04); font-weight: 500; }
+.compare-table td .check { color: var(--green); font-weight: 700; }
+.compare-table td .cross { color: var(--gray-400); }
+
+/* Story arrow */
+.flow {
+  display: flex; align-items: center; gap: 8px;
+  margin: 20px 0; flex-wrap: wrap;
+}
+.flow-step {
+  flex: 1; min-width: 130px;
+  padding: 14px 16px; border-radius: 8px; background: var(--gray-50); border: 1px solid var(--gray-200);
+  font-size: 12px; text-align: center; position: relative;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.6s, transform 0.6s;
+}
+.flow-step.visible { opacity: 1; transform: translateY(0); }
+.flow-step .icon { font-size: 18px; margin-bottom: 6px; }
+.flow-step .v { font-size: 16px; font-weight: 700; color: var(--va-red); margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
+.flow-step .l { font-size: 11px; color: var(--gray-500); }
+.flow-arrow { color: var(--gray-300); font-size: 20px; flex: 0; }
+
+/* Cost donut */
+.donut-wrap { display: flex; gap: 24px; align-items: center; }
+.donut { width: 160px; height: 160px; flex-shrink: 0; }
+.donut-legend { flex: 1; font-size: 12px; }
+.donut-legend .item { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+.donut-legend .swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.donut-legend .item .name { flex: 1; }
+.donut-legend .item .amt { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* Animations */
+@keyframes float-up { 0% { transform: translateY(20px); opacity: 0 } 100% { transform: translateY(0); opacity: 1 } }
+.animate-in { animation: float-up 0.7s ease-out forwards; }
+
+.payback {
+  background: linear-gradient(135deg, var(--green) 0%, #047857 100%);
+  color: white; padding: 24px 28px; border-radius: 8px; margin-top: 16px;
+  display: flex; align-items: center; gap: 24px;
+}
+.payback .icon-big { font-size: 48px; line-height: 1; }
+.payback .text { flex: 1; }
+.payback .text .h { font-size: 18px; font-weight: 700; }
+.payback .text .p { font-size: 13px; opacity: 0.92; margin-top: 4px; }
+.payback .number-big { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">VS</div>
+  <h1>Virgin Atlantic Cargo &mdash; Yield Agent Cockpit</h1>
+  <div class="badge">DEMO ENVIRONMENT</div>
+  <div class="powered">Powered by Databricks Data Intelligence Platform</div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" data-tab="inbox">RFQ Inbox <span id="rfq-count" class="badge" style="background: var(--va-red); color: white; padding: 2px 8px; margin-left: 6px; border-radius: 10px; font-size: 11px;">0</span></div>
+  <div class="tab" data-tab="analytics">Analytics</div>
+  <div class="tab" data-tab="forwarders">Forwarders</div>
+  <div class="tab" data-tab="genie">Ask Genie</div>
+  <div class="tab" data-tab="business">Business Case</div>
+  <div class="tab" data-tab="about">About this demo</div>
+</div>
+
+<main>
+  <div id="view-inbox">
+    <div class="kpi-grid" id="kpi-grid">
+      <div class="kpi-card"><div class="label">Cargo Revenue (last 30d)</div><div class="value" id="kpi-revenue">&mdash;</div><div class="delta" id="kpi-revenue-delta"></div></div>
+      <div class="kpi-card"><div class="label">Tonnage (last 30d)</div><div class="value" id="kpi-tonnage">&mdash;</div></div>
+      <div class="kpi-card"><div class="label">Avg Yield</div><div class="value" id="kpi-yield">&mdash;</div></div>
+      <div class="kpi-card"><div class="label">Avg Load Factor</div><div class="value" id="kpi-loadfactor">&mdash;</div></div>
+      <div class="kpi-card"><div class="label">Open RFQs Awaiting Quote</div><div class="value" id="kpi-rfqs">&mdash;</div></div>
+    </div>
+
+    <div class="split-pane">
+      <div class="panel" style="margin-bottom: 0;">
+        <div class="panel-header"><h2>RFQ Inbox</h2><span class="mono" style="font-size:11px;color:var(--gray-500)" id="rfq-summary"></span></div>
+        <div class="panel-body" id="rfq-list-container">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <div id="rfq-detail-pane">
+        <div class="empty">
+          <p style="font-size: 15px; margin-bottom: 8px;">Select an RFQ to analyze</p>
+          <p style="font-size: 12px;">The Cargo Yield Agent will retrieve capacity, compute optimal yield, benchmark competitors, retrieve handling rules from Vector Search, and draft a recommendation using Claude Sonnet 4.6.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-analytics" style="display:none;">
+    <div class="panel">
+      <div class="panel-header"><h2>Monthly Revenue (T12M)</h2></div>
+      <div class="panel-body" id="monthly-chart-container">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><h2>Top Lanes (T6M)</h2></div>
+      <div class="panel-body" id="lanes-container"></div>
+    </div>
+  </div>
+
+  <div id="view-forwarders" style="display:none;">
+    <div class="panel">
+      <div class="panel-header"><h2>Forwarder Performance</h2></div>
+      <div class="panel-body" id="forwarders-container">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-genie" style="display:none;">
+    <div class="genie-shell">
+      <div class="genie-header">
+        <div class="icon">G</div>
+        <div>
+          <div class="title">Virgin Atlantic Cargo — Yield Analytics</div>
+          <div class="subtitle">AI/BI Genie space · 7 tables · gold + silver</div>
+        </div>
+        <button class="btn secondary new-conv" onclick="genieNew()">New conversation</button>
+      </div>
+      <div class="genie-body" id="genie-body">
+        <div style="text-align: center; padding: 24px 12px 4px; color: var(--gray-500); font-size: 13px;">
+          Ask anything about cargo revenue, lanes, forwarders, yield, or competitor position. <br/>
+          Powered by Genie — your team gets the same chat experience natively in the workspace.
+        </div>
+        <div class="sample-chips" id="sample-chips"></div>
+      </div>
+      <div class="genie-footer">
+        <div class="genie-input-row">
+          <input class="genie-input" id="genie-input" placeholder="e.g. Which lanes have soft load factor and high yield potential?" />
+          <button class="btn" id="genie-send" onclick="genieSend()">Ask</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-business" style="display:none;">
+    <div class="bc-hero" id="bc-hero">
+      <h1>£12M annual uplift on £236M cargo revenue</h1>
+      <p>Dynamic AWB pricing on the Databricks platform you already own. No new vendor. 12 weeks to production.</p>
+      <div class="stats">
+        <div class="stat"><div class="v counter" data-target="12" data-prefix="£" data-suffix="M">£0M</div><div class="l">Annual uplift</div></div>
+        <div class="stat"><div class="v counter" data-target="11" data-prefix="£" data-suffix="K">£0K</div><div class="l">Annual run cost</div></div>
+        <div class="stat"><div class="v counter" data-target="1090" data-suffix="×" data-decimals="0">0×</div><div class="l">ROI</div></div>
+        <div class="stat"><div class="v counter" data-target="8" data-suffix="h">0h</div><div class="l">Payback</div></div>
+      </div>
+    </div>
+
+    <div class="bc-grid">
+      <div class="bc-card">
+        <h3>The lever</h3>
+        <h2 style="margin-bottom: 16px;">3–7% yield uplift on every quote</h2>
+        <p style="font-size: 13px; color: var(--gray-700); line-height: 1.6; margin-bottom: 14px;">The agent reads capacity, runs the ML yield model, benchmarks competitors, and drafts a quote in 15 seconds. Sales approves; the quote fires.</p>
+        <div class="waterfall" id="bc-waterfall">
+          <div class="wf-row"><div class="lbl">Dynamic AWB pricing</div><div class="bar-track"><div class="bar-fill" data-width="80"></div></div><div class="amt">£12M</div></div>
+          <div class="wf-row"><div class="lbl">+1pp load factor</div><div class="bar-track"><div class="bar-fill" data-width="18"></div></div><div class="amt">£2.5M</div></div>
+          <div class="wf-row"><div class="lbl">Mix optimisation</div><div class="bar-track"><div class="bar-fill" data-width="55"></div></div><div class="amt">£8M</div></div>
+        </div>
+        <p style="font-size: 11px; color: var(--gray-500); margin-top: 14px;">Industry benchmarks: PROS, Revenue Technology Services, IATA dynamic pricing studies. Conservative blended estimate.</p>
+      </div>
+
+      <div class="bc-card">
+        <h3>The cost</h3>
+        <h2 style="margin-bottom: 14px;"><span class="counter" data-target="11" data-prefix="£" data-suffix="K">£0K</span> / year on Databricks</h2>
+        <div class="donut-wrap">
+          <svg class="donut" viewBox="0 0 42 42">
+            <circle cx="21" cy="21" r="15.91549430918954" fill="#fff" stroke="#F3F4F6" stroke-width="3"/>
+            <g id="donut-segments"></g>
+            <text x="21" y="20" text-anchor="middle" font-size="6" font-weight="700" fill="#0B2026">£11K</text>
+            <text x="21" y="25" text-anchor="middle" font-size="3" fill="#6B7280">per year</text>
+          </svg>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
+        <p style="font-size: 11px; color: var(--gray-500); margin-top: 12px;">~500 RFQs/day, scale-to-zero on serving endpoints, list prices. Compares to <strong>£400K–£1.6M/year</strong> for PROS / RTS / Sabre licence alone.</p>
+      </div>
+    </div>
+
+    <div class="payback" style="margin-top: 0;">
+      <div class="icon-big">⏱️</div>
+      <div class="text">
+        <div class="h">First-shift break-even</div>
+        <div class="p">£11K annual run cost ÷ £33K/day uplift = system pays for itself by lunchtime on day one. Every quote after that is pure margin.</div>
+      </div>
+      <div class="number-big">8h</div>
+    </div>
+  </div>
+
+  <div id="view-about" style="display:none;">
+    <div class="panel" style="padding: 24px;">
+      <h2 style="font-size: 18px; margin-bottom: 8px;">Cargo Yield Agent — Demo Architecture</h2>
+      <p style="margin-bottom: 20px; color: var(--gray-700);">An end-to-end Databricks Data Intelligence Platform demo built for Virgin Atlantic Cargo. The agent dynamically prices inbound forwarder RFQs using a real ML yield model, capacity analysis, competitive intelligence, and IATA/VAA handling rules. Every component is a discoverable workspace asset.</p>
+
+      <h3 style="font-size: 14px; margin: 18px 0 8px; color: var(--gray-700); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Workspace assets</h3>
+      <table style="margin: 0 -20px;">
+        <thead><tr><th>Asset</th><th>Type</th><th>Where</th></tr></thead>
+        <tbody>
+          <tr><td class="mono"><strong>cargo-yield-agent</strong></td><td>Model Serving endpoint</td><td>Serving Endpoints — pyfunc, MLflow traces enabled</td></tr>
+          <tr><td class="mono"><strong>cargo-yield-model</strong></td><td>Model Serving endpoint</td><td>Serving Endpoints — sklearn GBM</td></tr>
+          <tr><td class="mono">cargo_ai.yield_agent</td><td>UC registered model</td><td>Catalog Explorer (alias: production)</td></tr>
+          <tr><td class="mono">cargo_ai.yield_model</td><td>UC registered model</td><td>Catalog Explorer (alias: production)</td></tr>
+          <tr><td class="mono">cargo_yield_pipeline</td><td>Lakeflow Pipeline (DLT)</td><td>Pipelines — 7 tables, expectations, lineage</td></tr>
+          <tr><td class="mono">cargo_yield_orchestration</td><td>Lakeflow Job</td><td>Jobs — DLT → QA → Vector Search sync</td></tr>
+          <tr><td class="mono">cargo_ai.knowledge_base_index</td><td>Vector Search index</td><td>Vector Search — 15 docs (IATA, special cargo, lane briefs)</td></tr>
+          <tr><td>Virgin Atlantic Cargo Genie</td><td>AI/BI Genie space</td><td>Genie — 7 tables, natural-language analytics</td></tr>
+          <tr><td class="mono">va-cargo-yield</td><td>Databricks App</td><td>This cockpit (FastAPI + React)</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-size: 14px; margin: 22px 0 8px; color: var(--gray-700); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Pipeline stack</h3>
+      <table style="margin: 0 -20px;">
+        <thead><tr><th>Layer</th><th>Component</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>Ingestion</td><td class="mono">Lakeflow Connect</td><td>AWB feeds, forwarder APIs, competitor rate scrapes</td></tr>
+          <tr><td>Pipelines</td><td class="mono">Lakeflow Pipelines (DLT)</td><td>Bronze → Silver → Gold with quality expectations</td></tr>
+          <tr><td>Orchestration</td><td class="mono">Lakeflow Jobs</td><td>Daily DLT refresh + QA + VS sync (scheduled, serverless)</td></tr>
+          <tr><td>Governance</td><td class="mono">Unity Catalog</td><td>Catalog, schemas, lineage, ABAC, model registry</td></tr>
+          <tr><td>ML training</td><td class="mono">MLflow</td><td>Gradient-boosted yield model with metrics + signatures</td></tr>
+          <tr><td>ML inference</td><td class="mono">Model Serving</td><td>cargo-yield-model — scale-to-zero, sub-second predictions</td></tr>
+          <tr><td>Agent</td><td class="mono">MLflow PyFunc</td><td>cargo-yield-agent — 5-step pipeline with MLflow Tracing</td></tr>
+          <tr><td>Retrieval</td><td class="mono">Vector Search</td><td>RAG over IATA + special cargo + lane briefs</td></tr>
+          <tr><td>Reasoning</td><td class="mono">Foundation Model API</td><td>Claude Sonnet 4.6 — rationale + quote drafting</td></tr>
+          <tr><td>UI</td><td class="mono">Databricks Apps</td><td>This cockpit — FastAPI + React, thin client over the agent</td></tr>
+          <tr><td>Self-serve</td><td class="mono">AI/BI Genie</td><td>Natural-language analytics for cargo sales team</td></tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-size: 14px; margin: 22px 0 8px; color: var(--gray-700); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Agent invocation flow</h3>
+      <ol style="margin-left: 20px; color: var(--gray-700); font-size: 13px; line-height: 1.7;">
+        <li>App receives <span class="mono">POST /api/rfq/{id}/analyze</span></li>
+        <li>App invokes <span class="mono">cargo-yield-agent</span> serving endpoint with the RFQ payload</li>
+        <li>Agent runs 5 steps (each as an MLflow trace span):
+          <ul style="margin: 4px 0 4px 20px;">
+            <li><strong>capacity_check</strong> — SQL warehouse → silver/bronze</li>
+            <li><strong>yield_calc</strong> — calls <span class="mono">cargo-yield-model</span> + historical fallback</li>
+            <li><strong>competitive_check</strong> — SQL warehouse → gold</li>
+            <li><strong>rules_retrieval</strong> — Vector Search</li>
+            <li><strong>quote_drafting</strong> — Claude Sonnet 4.6</li>
+          </ul>
+        </li>
+        <li>Agent returns structured trace; App renders it in the cockpit</li>
+        <li>Every invocation logs a trace to MLflow — queryable for audit, eval, debugging</li>
+      </ol>
+
+      <h3 style="font-size: 14px; margin: 22px 0 8px; color: var(--gray-700); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Data scale</h3>
+      <ul style="margin-left: 22px; color: var(--gray-700); font-size: 13px; line-height: 1.7;">
+        <li><strong>123,011 synthetic AWBs</strong> across 12 months</li>
+        <li><strong>7,015 flights</strong>, 17 active lanes</li>
+        <li><strong>15 forwarders</strong> across 4 tiers (Platinum / Gold / Silver / Bronze)</li>
+        <li><strong>12 commodity codes</strong> including PHC, PER, AVI, VAL, DGR</li>
+        <li><strong>~£272M synthetic cargo revenue</strong> (calibrated to VAA FY24 £236M)</li>
+        <li><strong>15 knowledge base documents</strong> indexed in Vector Search</li>
+        <li><strong>714 competitor rate observations</strong> across 7 carriers</li>
+      </ul>
+    </div>
+  </div>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+const fmt = {
+  gbp: n => n == null ? '—' : '£' + Number(n).toLocaleString('en-GB', {maximumFractionDigits: 0}),
+  gbpM: n => n == null ? '—' : '£' + (Number(n)/1e6).toFixed(1) + 'M',
+  gbpK: n => n == null ? '—' : '£' + (Number(n)/1e3).toFixed(0) + 'K',
+  kg: n => n == null ? '—' : Number(n).toLocaleString('en-GB', {maximumFractionDigits: 0}) + ' kg',
+  t:  n => n == null ? '—' : Number(n).toLocaleString('en-GB', {maximumFractionDigits: 0}) + 't',
+  pct: n => n == null ? '—' : (Number(n)*100).toFixed(1) + '%',
+  pct1: n => n == null ? '—' : Number(n).toFixed(1) + '%',
+  rate: n => n == null ? '—' : '£' + Number(n).toFixed(3),
+};
+
+let selectedRfqId = null;
+
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  if (!r.ok) throw new Error(`API ${path} returned ${r.status}`);
+  return r.json();
+}
+
+async function loadKPIs() {
+  try {
+    const k = await api('/api/analytics/summary');
+    $('#kpi-revenue').textContent = fmt.gbpM(k.rev_30d);
+    const growth = k.rev_growth_pct;
+    if (growth != null) {
+      const el = $('#kpi-revenue-delta');
+      el.textContent = (growth >= 0 ? '+' : '') + (growth*100).toFixed(1) + '% vs prior 30d';
+      el.className = 'delta ' + (growth >= 0 ? 'up' : 'down');
+    }
+    $('#kpi-tonnage').textContent = fmt.t((k.kg_30d || 0) / 1000);
+    $('#kpi-yield').textContent = fmt.rate(k.avg_yield_30d) + '/kg';
+    $('#kpi-loadfactor').textContent = fmt.pct(k.avg_load_factor);
+  } catch (e) { console.error(e); }
+}
+
+async function loadRFQs() {
+  try {
+    const data = await api('/api/rfqs');
+    $('#rfq-count').textContent = data.count;
+    $('#kpi-rfqs').textContent = data.count;
+    $('#rfq-summary').textContent = `${data.count} pending`;
+    const container = $('#rfq-list-container');
+    if (data.count === 0) {
+      container.innerHTML = '<div class="empty">No open RFQs</div>';
+      return;
+    }
+    container.innerHTML = `
+      <table>
+        <thead><tr><th>Received</th><th>Forwarder</th><th>Lane</th><th>Commodity</th><th style="text-align:right">Weight</th><th>Flight</th></tr></thead>
+        <tbody>
+          ${data.rfqs.map(r => `
+            <tr data-id="${r.rfq_id}" class="rfq-row ${r.rfq_id === selectedRfqId ? 'selected' : ''}">
+              <td><span class="mono" style="color:var(--gray-500);font-size:11px">${(r.received_at||'').substring(5,16).replace('T',' ')}</span></td>
+              <td><strong>${r.forwarder_name}</strong></td>
+              <td class="mono">${r.lane}</td>
+              <td>
+                ${r.commodity_name || r.commodity_code}
+                ${r.handling_tier && r.handling_tier !== 'Standard' ? `<span class="tag ${r.handling_tier.toLowerCase()}" style="margin-left:6px">${r.handling_tier}</span>` : ''}
+              </td>
+              <td style="text-align:right" class="mono"><strong>${fmt.kg(r.requested_weight_kg)}</strong></td>
+              <td class="mono" style="font-size:12px">${r.flight_id}<br/><span style="color:var(--gray-500);font-size:11px">${(r.flight_date||'').substring(0,10)}</span></td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+    $$('.rfq-row').forEach(row => {
+      row.addEventListener('click', () => selectRFQ(row.dataset.id));
+    });
+  } catch (e) {
+    console.error(e);
+    $('#rfq-list-container').innerHTML = `<div class="empty">Error loading RFQs: ${e.message}</div>`;
+  }
+}
+
+async function selectRFQ(rfqId) {
+  selectedRfqId = rfqId;
+  $$('.rfq-row').forEach(r => r.classList.toggle('selected', r.dataset.id === rfqId));
+  const pane = $('#rfq-detail-pane');
+  pane.innerHTML = `
+    <div class="panel">
+      <div class="panel-header"><h2>Cargo Yield Agent</h2><span class="mono" style="font-size:11px;color:var(--gray-500)">${rfqId}</span></div>
+      <div class="panel-body">
+        <div class="loading"><div class="spinner"></div><div style="margin-top:12px;font-size:13px">Running agent: capacity → yield → competitive → rules → drafting...</div></div>
+      </div>
+    </div>
+  `;
+  try {
+    const t0 = performance.now();
+    const trace = await api(`/api/rfq/${rfqId}/analyze`, {method: 'POST'});
+    const totalMs = Math.round(performance.now() - t0);
+    renderAgentTrace(trace, totalMs);
+  } catch (e) {
+    pane.innerHTML = `<div class="panel"><div class="empty">Agent error: ${e.message}</div></div>`;
+  }
+}
+
+function renderAgentTrace(trace, totalMs) {
+  const fq = trace.final_quote || {};
+  const pane = $('#rfq-detail-pane');
+  pane.innerHTML = `
+    <div class="quote-card">
+      <div class="title">Agent recommendation</div>
+      <div class="rate">${fmt.rate(fq.rate_gbp_per_kg)}<small>/kg</small></div>
+      <div class="revenue">Expected revenue: <strong>${fmt.gbp(fq.revenue_gbp)}</strong> on ${fmt.kg(fq.weight_kg)}</div>
+      <div class="meta">
+        <div><span class="k">Position vs market</span><br/><span class="v">${(fq.competitive_position||'—').replace('_',' ')}</span></div>
+        <div><span class="k">Load factor impact</span><br/><span class="v">${fq.load_factor_impact||'—'}</span></div>
+        <div><span class="k">Quote validity</span><br/><span class="v">${fq.valid_until_hours||24}h</span></div>
+        <div><span class="k">Agent latency</span><br/><span class="v mono">${totalMs}ms</span></div>
+      </div>
+      <div class="actions">
+        <button class="btn approve" onclick="submitQuote('${trace.rfq_id}', ${fq.rate_gbp_per_kg}, ${fq.weight_kg})">Approve &amp; fire to forwarder</button>
+        <button class="btn secondary">Adjust rate</button>
+      </div>
+    </div>
+
+    <div class="agent-trace" style="margin-top:14px">
+      ${trace.steps.map(s => renderStep(s)).join('')}
+    </div>
+
+    <div class="rationale" style="margin-top:14px">
+      <h4>Analyst rationale (Claude Sonnet 4.6)</h4>
+      <div>${(trace.rationale||'').replace(/</g,'&lt;')}</div>
+    </div>
+  `;
+}
+
+function renderStep(step) {
+  const o = step.output || {};
+  let body = '';
+  if (step.name === 'capacity_check') {
+    body = `
+      <div class="kv"><span class="k">Aircraft</span><span class="v">${o.aircraft || '—'} on ${o.lane||''}</span></div>
+      <div class="kv"><span class="k">Capacity / booked / available</span><span class="v">${fmt.kg(o.capacity_kg)} / ${fmt.kg(o.booked_kg)} / ${fmt.kg(o.available_kg)}</span></div>
+      <div class="kv"><span class="k">Current load factor</span><span class="v">${fmt.pct(o.current_load_factor)}</span></div>
+      <div class="kv"><span class="k">Post-acceptance load factor</span><span class="v">${fmt.pct(o.projected_load_factor_post)}</span></div>
+      <div class="kv"><span class="k">Tightness</span><span class="v">${o.tightness}</span></div>
+      <div class="kv"><span class="k">Fits in remaining capacity</span><span class="v">${o.fits ? '✓ yes' : '✗ overbooked'}</span></div>
+    `;
+  } else if (step.name === 'yield_calc') {
+    body = `
+      <div class="kv"><span class="k">Historical base rate</span><span class="v">${fmt.rate(o.base_rate_gbp_per_kg)}/kg (±${fmt.rate(o.rate_std)})</span></div>
+      <div class="kv"><span class="k">Forwarder historical avg</span><span class="v">${o.forwarder_historical_rate ? fmt.rate(o.forwarder_historical_rate)+'/kg' : 'no prior'}</span></div>
+      <div class="kv"><span class="k">Sample size</span><span class="v">${o.sample_size} AWBs (last 90d)</span></div>
+      <div class="kv"><span class="k">Capacity premium</span><span class="v">${o.capacity_premium_pct}%</span></div>
+      <div class="kv"><span class="k">Recommended rate</span><span class="v"><strong>${fmt.rate(o.recommended_rate_gbp_per_kg)}/kg</strong></span></div>
+      <div class="kv"><span class="k">Expected revenue</span><span class="v"><strong>${fmt.gbp(o.expected_revenue_gbp)}</strong></span></div>
+    `;
+  } else if (step.name === 'competitive_check') {
+    body = `
+      <div class="kv"><span class="k">Competitors observed</span><span class="v">${o.competitors_observed}</span></div>
+      <div class="kv"><span class="k">Median competitor rate</span><span class="v">${fmt.rate(o.median_competitor_rate)}/kg</span></div>
+      <div class="kv"><span class="k">Range</span><span class="v">${fmt.rate(o.min_competitor_rate)} – ${fmt.rate(o.max_competitor_rate)}/kg</span></div>
+      <div class="kv"><span class="k">Our position</span><span class="v">${(o.our_position||'').replace('_',' ')}</span></div>
+      ${(o.competitor_rates||[]).map(c => `<div class="kv"><span class="k" style="padding-left:14px">↳ ${c.competitor}</span><span class="v">${fmt.rate(c.rate)}/kg</span></div>`).join('')}
+    `;
+  } else if (step.name === 'rules_retrieval') {
+    body = `
+      <div class="kv"><span class="k">Documents retrieved</span><span class="v">${o.retrieved} from Vector Search</span></div>
+      ${(o.documents||[]).slice(0,4).map(d => `<div class="kv"><span class="k" style="padding-left:14px">↳ ${d.title || d.doc_id}</span><span class="v" style="opacity:0.7">${d.category}</span></div>`).join('')}
+    `;
+  } else if (step.name === 'quote_drafting') {
+    body = `
+      <div class="kv"><span class="k">Model</span><span class="v">${o.model || '—'}</span></div>
+      <div class="kv"><span class="k">Token usage</span><span class="v">${o.tokens?.input || 0} in / ${o.tokens?.output || 0} out</span></div>
+    `;
+  }
+  return `
+    <div class="trace-step">
+      <div class="step-header">
+        <div class="step-icon ${step.status}">${step.status === 'done' ? '✓' : step.status === 'failed' ? '✗' : '↻'}</div>
+        <div class="step-name">${step.name.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
+        <div class="step-duration">${step.duration_ms}ms</div>
+      </div>
+      <div class="step-body">${body}</div>
+    </div>
+  `;
+}
+
+async function submitQuote(rfqId, rate, weight) {
+  try {
+    const r = await api('/api/quote/submit', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({rfq_id: rfqId, rate_gbp_per_kg: rate, weight_kg: weight, user_email: 'demo@virgin-atlantic.com'})
+    });
+    alert(`Quote ${r.quote_id} fired to forwarder.\nRate: £${r.rate_gbp_per_kg}/kg\nRevenue: £${r.revenue_gbp.toLocaleString()}`);
+  } catch (e) { alert('Error: ' + e.message); }
+}
+
+async function loadAnalytics() {
+  try {
+    const m = await api('/api/analytics/monthly');
+    const data = m.monthly || [];
+    if (data.length === 0) return;
+    const max = Math.max(...data.map(d => d.revenue_gbp));
+    const bars = data.map(d => {
+      const h = Math.max(2, (d.revenue_gbp / max) * 100);
+      const label = d.month.substring(2, 7);  // YY-MM
+      return `<div class="bar" style="height:${h}%" data-tooltip="${label}: £${(d.revenue_gbp/1e6).toFixed(2)}M"></div>`;
+    }).join('');
+    const labels = data.map(d => `<div class="bar-label">${d.month.substring(2, 7)}</div>`).join('');
+    $('#monthly-chart-container').innerHTML = `
+      <div class="chart">
+        <div class="bar-chart">${bars}</div>
+        <div class="bar-labels">${labels}</div>
+      </div>`;
+
+    const l = await api('/api/analytics/lanes');
+    const lanes = l.lanes || [];
+    $('#lanes-container').innerHTML = `
+      <table>
+        <thead><tr><th>Lane</th><th style="text-align:right">Tonnage</th><th style="text-align:right">Revenue</th><th style="text-align:right">Avg Yield</th></tr></thead>
+        <tbody>
+          ${lanes.map(L => `
+            <tr>
+              <td class="mono"><strong>${L.lane}</strong></td>
+              <td style="text-align:right">${fmt.t(L.tonnage_tonnes)}</td>
+              <td style="text-align:right"><strong>${fmt.gbpM(L.revenue_gbp)}</strong></td>
+              <td style="text-align:right" class="mono">${fmt.rate(L.avg_yield)}/kg</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  } catch (e) { console.error(e); }
+}
+
+async function loadForwarders() {
+  try {
+    const f = await api('/api/analytics/forwarders');
+    const forwarders = f.forwarders || [];
+    $('#forwarders-container').innerHTML = `
+      <table>
+        <thead><tr><th>Forwarder</th><th>Tier</th><th style="text-align:right">AWBs</th><th style="text-align:right">Tonnage</th><th style="text-align:right">Revenue</th><th style="text-align:right">Avg Yield</th><th style="text-align:right">Premium %</th></tr></thead>
+        <tbody>
+          ${forwarders.map(f => `
+            <tr>
+              <td><strong>${f.forwarder_name}</strong></td>
+              <td><span class="tag ${f.account_tier.toLowerCase()}">${f.account_tier}</span></td>
+              <td style="text-align:right" class="mono">${(f.awb_count||0).toLocaleString()}</td>
+              <td style="text-align:right">${fmt.t((f.total_kg||0)/1000)}</td>
+              <td style="text-align:right"><strong>${fmt.gbpM(f.total_revenue_gbp)}</strong></td>
+              <td style="text-align:right" class="mono">${fmt.rate(f.avg_yield_gbp_per_kg)}/kg</td>
+              <td style="text-align:right">${fmt.pct1(f.premium_revenue_share_pct)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+  } catch (e) { console.error(e); }
+}
+
+// ----- Genie chat -----
+let genieConversationId = null;
+
+async function loadGenieChips() {
+  try {
+    const data = await api('/api/genie/sample-questions');
+    const chips = $('#sample-chips');
+    if (!chips || chips.children.length) return;
+    chips.innerHTML = data.questions.map(q =>
+      `<div class="sample-chip" onclick="genieAsk('${q.replace(/'/g, "\\'")}')">${q}</div>`
+    ).join('');
+  } catch (e) { console.error(e); }
+}
+
+function genieNew() {
+  genieConversationId = null;
+  $('#genie-body').innerHTML = `
+    <div style="text-align: center; padding: 24px 12px 4px; color: var(--gray-500); font-size: 13px;">
+      Ask anything about cargo revenue, lanes, forwarders, yield, or competitor position.<br/>
+      Powered by Genie — your team gets the same chat experience natively in the workspace.
+    </div>
+    <div class="sample-chips" id="sample-chips"></div>`;
+  loadGenieChips();
+}
+
+function appendUserMsg(content) {
+  const body = $('#genie-body');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `<div class="avatar">N</div><div class="content"><div class="author">You</div><div>${content.replace(/</g,'&lt;')}</div></div>`;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function appendThinking() {
+  const body = $('#genie-body');
+  const div = document.createElement('div');
+  div.className = 'msg assistant';
+  div.id = 'thinking-msg';
+  div.innerHTML = `<div class="avatar">G</div>
+    <div class="content"><div class="author">Genie</div>
+      <div class="genie-thinking">
+        <div class="thinking-dots"><span></span><span></span><span></span></div>
+        <span id="thinking-status">Thinking…</span>
+      </div>
+    </div>`;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+  return div;
+}
+
+function renderTable(cols, rows) {
+  if (!cols || !cols.length) return '';
+  return `
+    <div class="result-meta">${rows.length} row${rows.length !== 1 ? 's' : ''}</div>
+    <div class="result-table-wrap">
+      <table class="result-table">
+        <thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+        <tbody>
+          ${rows.map(r => `<tr>${r.map(c => `<td>${formatCell(c)}</td>`).join('')}</tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function formatCell(v) {
+  if (v === null || v === undefined) return '<span style="color:var(--gray-300)">—</span>';
+  if (typeof v === 'string' && v.length > 50) return v.substring(0, 47) + '...';
+  if (typeof v === 'number' || (!isNaN(parseFloat(v)) && isFinite(v))) {
+    const n = parseFloat(v);
+    if (Math.abs(n) >= 1000) return n.toLocaleString('en-GB', {maximumFractionDigits: 2});
+    if (Math.abs(n) < 1 && n !== 0) return n.toFixed(4);
+    return n.toLocaleString('en-GB', {maximumFractionDigits: 3});
+  }
+  return v;
+}
+
+function renderAssistantMsg(payload) {
+  const thinking = $('#thinking-msg');
+  if (thinking) thinking.remove();
+  const body = $('#genie-body');
+  const atts = payload.attachments || [];
+  let html = '';
+  for (const a of atts) {
+    if (a.type === 'text') {
+      html += `<div class="msg-text">${(a.content || '').replace(/</g,'&lt;').replace(/\n/g, '<br/>')}</div>`;
+    } else if (a.type === 'query') {
+      const sqlId = 'sql-' + Math.random().toString(36).slice(2);
+      if (a.description) html += `<div class="msg-text">${a.description.replace(/</g,'&lt;').replace(/\n/g, '<br/>')}</div>`;
+      html += renderTable(a.columns, a.rows);
+      if (a.sql) {
+        html += `
+          <div class="sql-toggle" onclick="document.getElementById('${sqlId}').style.display = document.getElementById('${sqlId}').style.display==='none'?'block':'none'">▸ Show SQL</div>
+          <div id="${sqlId}" style="display:none">
+            <div class="sql-block">
+              <div class="sql-header"><span>${a.title || 'Generated SQL'}</span><span>Statement ${a.statement_id ? a.statement_id.substring(0,8) : ''}</span></div>${a.sql}
+            </div>
+          </div>`;
+      }
+    }
+  }
+  if (!html && payload.content) {
+    html = `<div class="msg-text">${payload.content.replace(/</g,'&lt;')}</div>`;
+  }
+  const div = document.createElement('div');
+  div.className = 'msg assistant';
+  div.innerHTML = `<div class="avatar">G</div>
+    <div class="content"><div class="author">Genie</div>${html}</div>`;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function renderError(msg) {
+  const thinking = $('#thinking-msg');
+  if (thinking) thinking.remove();
+  const body = $('#genie-body');
+  const div = document.createElement('div');
+  div.className = 'msg assistant';
+  div.innerHTML = `<div class="avatar">G</div>
+    <div class="content"><div class="author">Genie</div>
+      <div class="msg-text" style="color: var(--red)">⚠ ${msg.replace(/</g,'&lt;')}</div>
+    </div>`;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+async function genieAsk(content) {
+  if (!content || !content.trim()) return;
+  appendUserMsg(content);
+  appendThinking();
+  $('#genie-input').value = '';
+  $('#genie-send').disabled = true;
+  $('#genie-input').disabled = true;
+  try {
+    const start = await api('/api/genie/ask', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({content, conversation_id: genieConversationId}),
+    });
+    genieConversationId = start.conversation_id;
+    const msgId = start.message_id;
+    // Poll
+    const statusLabels = {'PENDING': 'Reading the question…', 'EXECUTING_QUERY': 'Running SQL…', 'IN_PROGRESS': 'Composing answer…'};
+    for (let i = 0; i < 90; i++) {
+      await new Promise(r => setTimeout(r, 1500));
+      const poll = await api(`/api/genie/conversation/${genieConversationId}/message/${msgId}`);
+      if (poll.status === 'COMPLETED') {
+        renderAssistantMsg(poll);
+        break;
+      }
+      if (poll.status === 'FAILED') {
+        renderError(poll.error || 'Genie could not answer this question.');
+        break;
+      }
+      const lbl = statusLabels[poll.status] || `${poll.status}…`;
+      const ts = $('#thinking-status');
+      if (ts) ts.textContent = lbl;
+      if (i === 89) renderError('Timeout waiting for Genie response.');
+    }
+  } catch (e) {
+    renderError(e.message);
+  } finally {
+    $('#genie-send').disabled = false;
+    $('#genie-input').disabled = false;
+    $('#genie-input').focus();
+  }
+}
+
+function genieSend() {
+  const v = $('#genie-input').value;
+  if (v.trim()) genieAsk(v);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && document.activeElement && document.activeElement.id === 'genie-input') {
+    genieSend();
+  }
+});
+
+// ===== Business Case tab — animations =====
+const costBreakdown = [
+  {name: 'Foundation Model API (Claude Sonnet)', value: 3285, color: '#E10A0A'},
+  {name: 'Vector Search endpoint',                value: 3942, color: '#6E1A5C'},
+  {name: 'Serverless SQL warehouse',              value: 3070, color: '#1B6AFF'},
+  {name: 'Yield model serving',                   value: 1460, color: '#FF6F2B'},
+  {name: 'Databricks App compute',                value: 1315, color: '#00A972'},
+  {name: 'Agent serving',                         value:  550, color: '#F59E0B'},
+  {name: 'Lakeflow Pipeline (DLT)',               value:  185, color: '#0EA5E9'},
+  {name: 'Storage + misc',                        value:   20, color: '#6B7280'},
+];
+
+function animateCounter(el, target, duration = 1400, prefix = '', suffix = '', decimals = 0) {
+  if (el.dataset.text) { el.textContent = el.dataset.text; return; }
+  const start = performance.now();
+  const initial = 0;
+  function tick(now) {
+    const t = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const v = initial + (target - initial) * eased;
+    el.textContent = prefix + v.toFixed(decimals) + suffix;
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function renderDonut() {
+  const total = costBreakdown.reduce((a, b) => a + b.value, 0);
+  const seg = document.getElementById('donut-segments');
+  if (!seg) return;
+  seg.innerHTML = '';
+  let offset = 25;  // start at top
+  costBreakdown.forEach((c, i) => {
+    const pct = (c.value / total) * 100;
+    const dash = `${pct} ${100 - pct}`;
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', '21');
+    circle.setAttribute('cy', '21');
+    circle.setAttribute('r', '15.91549430918954');
+    circle.setAttribute('fill', 'transparent');
+    circle.setAttribute('stroke', c.color);
+    circle.setAttribute('stroke-width', '3');
+    circle.setAttribute('stroke-dasharray', '0 100');
+    circle.setAttribute('stroke-dashoffset', offset);
+    circle.style.transition = `stroke-dasharray 0.8s ease-out ${i * 0.1}s`;
+    seg.appendChild(circle);
+    setTimeout(() => circle.setAttribute('stroke-dasharray', dash), 100);
+    offset -= pct;
+  });
+
+  // Legend
+  const leg = document.getElementById('donut-legend');
+  leg.innerHTML = costBreakdown.map(c => `
+    <div class="item">
+      <div class="swatch" style="background:${c.color}"></div>
+      <div class="name">${c.name}</div>
+      <div class="amt">£${(c.value/1000).toFixed(1)}K</div>
+    </div>`).join('');
+}
+
+let businessAnimated = false;
+function animateBusinessCase() {
+  if (businessAnimated) return;
+  businessAnimated = true;
+
+  // Counters
+  document.querySelectorAll('#view-business .counter').forEach(el => {
+    const target = parseFloat(el.dataset.target || '0');
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
+    const decimals = parseInt(el.dataset.decimals || '0');
+    setTimeout(() => animateCounter(el, target, 1400, prefix, suffix, decimals), 200);
+  });
+
+  // Waterfall bars
+  setTimeout(() => {
+    document.querySelectorAll('#bc-waterfall .bar-fill').forEach((bar, i) => {
+      const w = bar.dataset.width || '0';
+      setTimeout(() => bar.style.width = w + '%', i * 120);
+    });
+  }, 400);
+
+  // Flow steps fade in sequentially
+  document.querySelectorAll('#bc-flow .flow-step').forEach((step, i) => {
+    setTimeout(() => step.classList.add('visible'), 200 + i * 180);
+  });
+
+  // Donut
+  setTimeout(renderDonut, 300);
+}
+
+$$('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    const tab = t.dataset.tab;
+    $$('.tab').forEach(x => x.classList.toggle('active', x === t));
+    $$('main > div').forEach(v => v.style.display = (v.id === 'view-' + tab) ? '' : 'none');
+    if (tab === 'analytics') loadAnalytics();
+    if (tab === 'forwarders') loadForwarders();
+    if (tab === 'genie') loadGenieChips();
+    if (tab === 'business') animateBusinessCase();
+  });
+});
+
+// Initial load
+loadKPIs();
+loadRFQs();
+</script>
+</body>
+</html>
