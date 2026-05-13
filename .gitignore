@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.env.local
+
+# Node
+node_modules/
+dist/
+build/
+.npm
+.yarn
+
+# Editors / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Databricks
+.databricks/
+.databricks-login.json
+
+# Logs
+*.log
