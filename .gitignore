@@ -24,5 +24,8 @@ build/
 .databricks/
 .databricks-login.json
 
+# Rendered config (produced by scripts/render.sh)
+cargo_demo_app/app.yaml
+
 # Logs
 *.log

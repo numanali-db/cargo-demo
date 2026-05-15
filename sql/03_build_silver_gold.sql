@@ -2,7 +2,7 @@
 -- SILVER LAYER - Cleaned and enriched
 -- =============================================================================
 
-CREATE OR REPLACE TABLE serverless_nal_catalog.cargo_silver.awb_enriched AS
+CREATE OR REPLACE TABLE ${CATALOG}.cargo_silver.awb_enriched AS
 SELECT
   a.awb_number,
   a.flight_id,
@@ -33,12 +33,12 @@ SELECT
   MONTH(a.flight_date) AS flight_month,
   DATE_TRUNC('month', a.flight_date) AS flight_month_start,
   DATE_TRUNC('week', a.flight_date) AS flight_week_start
-FROM serverless_nal_catalog.cargo_bronze.awb_raw a
-LEFT JOIN serverless_nal_catalog.cargo_bronze.forwarders f ON a.forwarder_name = f.forwarder_name
-LEFT JOIN serverless_nal_catalog.cargo_bronze.commodities c ON a.commodity_code = c.commodity_code
-LEFT JOIN serverless_nal_catalog.cargo_bronze.flight_schedule s ON a.flight_id = s.flight_id;
+FROM ${CATALOG}.cargo_bronze.awb_raw a
+LEFT JOIN ${CATALOG}.cargo_bronze.forwarders f ON a.forwarder_name = f.forwarder_name
+LEFT JOIN ${CATALOG}.cargo_bronze.commodities c ON a.commodity_code = c.commodity_code
+LEFT JOIN ${CATALOG}.cargo_bronze.flight_schedule s ON a.flight_id = s.flight_id;
 
-CREATE OR REPLACE TABLE serverless_nal_catalog.cargo_silver.flight_utilization AS
+CREATE OR REPLACE TABLE ${CATALOG}.cargo_silver.flight_utilization AS
 SELECT
   s.flight_id,
   s.flight_date,
@@ -52,8 +52,8 @@ SELECT
   COALESCE(SUM(a.revenue_gbp), 0) AS total_revenue_gbp,
   COALESCE(SUM(a.revenue_gbp) / NULLIF(SUM(a.chargeable_weight_kg), 0), 0) AS avg_yield_gbp_per_kg,
   COUNT(a.awb_number) AS awb_count
-FROM serverless_nal_catalog.cargo_bronze.flight_schedule s
-LEFT JOIN serverless_nal_catalog.cargo_bronze.awb_raw a ON s.flight_id = a.flight_id
+FROM ${CATALOG}.cargo_bronze.flight_schedule s
+LEFT JOIN ${CATALOG}.cargo_bronze.awb_raw a ON s.flight_id = a.flight_id
 WHERE s.status = 'operated'
 GROUP BY ALL;
 
@@ -62,7 +62,7 @@ GROUP BY ALL;
 -- =============================================================================
 
 -- Monthly revenue by lane
-CREATE OR REPLACE TABLE serverless_nal_catalog.cargo_gold.lane_monthly_summary AS
+CREATE OR REPLACE TABLE ${CATALOG}.cargo_gold.lane_monthly_summary AS
 SELECT
   flight_month_start AS month,
   lane,
@@ -74,12 +74,12 @@ SELECT
   ROUND(AVG(rate_gbp_per_kg), 3) AS avg_yield_gbp_per_kg,
   COUNT(DISTINCT awb_number) AS awb_count,
   COUNT(DISTINCT forwarder_name) AS forwarder_count
-FROM serverless_nal_catalog.cargo_silver.awb_enriched
+FROM ${CATALOG}.cargo_silver.awb_enriched
 GROUP BY ALL
 ORDER BY month, revenue_gbp DESC;
 
 -- Forwarder performance
-CREATE OR REPLACE TABLE serverless_nal_catalog.cargo_gold.forwarder_performance AS
+CREATE OR REPLACE TABLE ${CATALOG}.cargo_gold.forwarder_performance AS
 SELECT
   forwarder_name,
   account_tier,
@@ -90,12 +90,12 @@ SELECT
   COUNT(DISTINCT lane) AS lanes_used,
   COUNT(DISTINCT commodity_code) AS commodities_shipped,
   ROUND(SUM(CASE WHEN handling_tier IN ('Premium', 'Specialist') THEN revenue_gbp ELSE 0 END) / SUM(revenue_gbp) * 100, 1) AS premium_revenue_share_pct
-FROM serverless_nal_catalog.cargo_silver.awb_enriched
+FROM ${CATALOG}.cargo_silver.awb_enriched
 GROUP BY ALL
 ORDER BY total_revenue_gbp DESC;
 
 -- Commodity mix
-CREATE OR REPLACE TABLE serverless_nal_catalog.cargo_gold.commodity_mix AS
+CREATE OR REPLACE TABLE ${CATALOG}.cargo_gold.commodity_mix AS
 SELECT
   commodity_code,
   commodity_name,
@@ -104,12 +104,12 @@ SELECT
   SUM(revenue_gbp) AS revenue_gbp,
   ROUND(AVG(rate_gbp_per_kg), 3) AS avg_yield_gbp_per_kg,
   COUNT(DISTINCT awb_number) AS awb_count
-FROM serverless_nal_catalog.cargo_silver.awb_enriched
+FROM ${CATALOG}.cargo_silver.awb_enriched
 GROUP BY ALL
 ORDER BY revenue_gbp DESC;
 
 -- Load factor trends (key metric)
-CREATE OR REPLACE TABLE serverless_nal_catalog.cargo_gold.load_factor_trends AS
+CREATE OR REPLACE TABLE ${CATALOG}.cargo_gold.load_factor_trends AS
 SELECT
   DATE_TRUNC('month', flight_date) AS month,
   lane,
@@ -119,12 +119,12 @@ SELECT
   SUM(cargo_capacity_kg) AS total_capacity_kg,
   SUM(total_revenue_gbp) AS total_revenue_gbp,
   ROUND(AVG(avg_yield_gbp_per_kg), 3) AS avg_yield_gbp_per_kg
-FROM serverless_nal_catalog.cargo_silver.flight_utilization
+FROM ${CATALOG}.cargo_silver.flight_utilization
 GROUP BY ALL
 ORDER BY month, total_revenue_gbp DESC;
 
 -- Competitor benchmark (for the agent + dashboards)
-CREATE OR REPLACE TABLE serverless_nal_catalog.cargo_gold.competitor_benchmark AS
+CREATE OR REPLACE TABLE ${CATALOG}.cargo_gold.competitor_benchmark AS
 WITH our_rates AS (
   SELECT
     lane,
@@ -132,7 +132,7 @@ WITH our_rates AS (
     destination_iata,
     commodity_code,
     AVG(rate_gbp_per_kg) AS our_avg_rate
-  FROM serverless_nal_catalog.cargo_silver.awb_enriched
+  FROM ${CATALOG}.cargo_silver.awb_enriched
   WHERE flight_date >= DATE_ADD(CURRENT_DATE(), -90)
   GROUP BY ALL
 )
@@ -145,7 +145,7 @@ SELECT
   c.rate_gbp_per_kg AS competitor_rate,
   o.our_avg_rate,
   ROUND((c.rate_gbp_per_kg - o.our_avg_rate) / NULLIF(o.our_avg_rate, 0) * 100, 1) AS gap_pct
-FROM serverless_nal_catalog.cargo_bronze.competitor_rates c
+FROM ${CATALOG}.cargo_bronze.competitor_rates c
 LEFT JOIN our_rates o ON c.origin_iata = o.origin_iata AND c.destination_iata = o.destination_iata AND c.commodity_code = o.commodity_code;
 
 SELECT 'Silver + gold tables built' AS status

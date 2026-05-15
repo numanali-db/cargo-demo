@@ -4,18 +4,21 @@
 # MAGIC
 # MAGIC Bronze → Silver → Gold transforms for the Cargo Yield Agent demo.
 # MAGIC
-# MAGIC **Sources:** `serverless_nal_catalog.cargo_bronze.*`
-# MAGIC **Sinks:** `serverless_nal_catalog.cargo_silver.*`, `serverless_nal_catalog.cargo_gold.*`
+# MAGIC **Sources:** `${catalog}.cargo_bronze.*`
+# MAGIC **Sinks:** `${catalog}.cargo_silver.*`, `${catalog}.cargo_gold.*`
 # MAGIC
 # MAGIC The pipeline is configured with default schema = `cargo_silver`. Gold tables use
 # MAGIC 2-part names (e.g. `cargo_gold.lane_monthly_summary`) to publish across schemas.
+# MAGIC
+# MAGIC Set the `catalog` configuration on the pipeline (Settings → Advanced → Configuration).
 
 # COMMAND ----------
 
 import dlt
 from pyspark.sql import functions as F
 
-CATALOG = "serverless_nal_catalog"
+# Lakeflow / DLT exposes pipeline configuration via spark.conf.
+CATALOG = spark.conf.get("catalog")
 BRONZE = f"{CATALOG}.cargo_bronze"
 
 

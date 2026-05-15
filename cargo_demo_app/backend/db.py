@@ -10,8 +10,8 @@ import json
 from typing import Any
 from databricks.sdk import WorkspaceClient
 
-WAREHOUSE_ID = os.environ.get("DATABRICKS_WAREHOUSE_ID", "410652ea4402d5bf")
-CATALOG = os.environ.get("CATALOG", "serverless_nal_catalog")
+WAREHOUSE_ID = os.environ["DATABRICKS_WAREHOUSE_ID"]
+CATALOG = os.environ["CATALOG"]
 
 # Single client - the SDK handles token refresh internally
 _w: WorkspaceClient | None = None

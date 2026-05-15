@@ -1,10 +1,12 @@
 -- Cargo Yield Agent Demo - Catalog Setup
-CREATE CATALOG IF NOT EXISTS cargo_demo COMMENT 'Virgin Atlantic Cargo Yield Agent Demo';
+-- Template: rendered by scripts/render.sh into build/sql/01_setup_catalog.sql
 
-CREATE SCHEMA IF NOT EXISTS cargo_demo.bronze COMMENT 'Raw cargo data feeds';
-CREATE SCHEMA IF NOT EXISTS cargo_demo.silver COMMENT 'Cleaned and enriched cargo data';
-CREATE SCHEMA IF NOT EXISTS cargo_demo.gold COMMENT 'Business-ready cargo analytics';
-CREATE SCHEMA IF NOT EXISTS cargo_demo.ai COMMENT 'AI artifacts: models, vector indexes, agents';
-CREATE SCHEMA IF NOT EXISTS cargo_demo.ops COMMENT 'Operational tables synced from Lakebase';
+CREATE CATALOG IF NOT EXISTS ${CATALOG} COMMENT 'Virgin Atlantic Cargo Yield Agent Demo';
 
-SELECT 'Catalog cargo_demo created with schemas: bronze, silver, gold, ai, ops' AS status;
+CREATE SCHEMA IF NOT EXISTS ${CATALOG}.cargo_bronze COMMENT 'Cargo demo - raw data feeds';
+CREATE SCHEMA IF NOT EXISTS ${CATALOG}.cargo_silver COMMENT 'Cleaned and enriched cargo data';
+CREATE SCHEMA IF NOT EXISTS ${CATALOG}.cargo_gold COMMENT 'Business-ready cargo analytics';
+CREATE SCHEMA IF NOT EXISTS ${CATALOG}.cargo_ai COMMENT 'AI artifacts: models, vector indexes, agents';
+CREATE SCHEMA IF NOT EXISTS ${CATALOG}.cargo_ops COMMENT 'Operational tables synced from Lakebase';
+
+SELECT 'Catalog ${CATALOG} created with schemas: cargo_bronze, cargo_silver, cargo_gold, cargo_ai, cargo_ops' AS status;

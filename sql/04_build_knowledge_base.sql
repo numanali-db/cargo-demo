@@ -2,7 +2,7 @@
 -- Knowledge Base for Cargo Yield Agent RAG
 -- =============================================================================
 
-CREATE OR REPLACE TABLE serverless_nal_catalog.cargo_ai.knowledge_base (
+CREATE OR REPLACE TABLE ${CATALOG}.cargo_ai.knowledge_base (
   doc_id STRING NOT NULL,
   category STRING,
   title STRING,
@@ -13,7 +13,7 @@ CREATE OR REPLACE TABLE serverless_nal_catalog.cargo_ai.knowledge_base (
 )
 TBLPROPERTIES (delta.enableChangeDataFeed = true);
 
-INSERT INTO serverless_nal_catalog.cargo_ai.knowledge_base VALUES
+INSERT INTO ${CATALOG}.cargo_ai.knowledge_base VALUES
 ('KB-001', 'iata_rules', 'IATA Cargo Rate Construction Basics',
 'Air cargo rates are constructed using General Cargo Rates (GCR), Specific Commodity Rates (SCR), and Class Rates. The chargeable weight is the higher of gross weight or volumetric weight (6000 cm3 per kg standard divisor). Minimum charges apply at MIN level. Rates published in TACT (The Air Cargo Tariff) form the industry reference. Virgin Atlantic publishes its own rates per lane per commodity, with negotiated discounts for tier-1 forwarders.',
 'IATA TACT, internal Virgin Atlantic cargo manual', ARRAY('rate_construction','iata','tact'),
@@ -89,4 +89,4 @@ CURRENT_TIMESTAMP()),
 'Virgin Atlantic Capacity Management SOP', ARRAY('no_show','offload','overbooking','capacity'),
 CURRENT_TIMESTAMP());
 
-SELECT COUNT(*) AS knowledge_base_size FROM serverless_nal_catalog.cargo_ai.knowledge_base
+SELECT COUNT(*) AS knowledge_base_size FROM ${CATALOG}.cargo_ai.knowledge_base

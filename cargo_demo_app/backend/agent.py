@@ -19,9 +19,9 @@ from typing import Any
 
 from . import db
 
-LLM_ENDPOINT = os.environ.get("LLM_ENDPOINT", "databricks-claude-sonnet-4-6")
-VS_INDEX = os.environ.get("VS_INDEX", "serverless_nal_catalog.cargo_ai.knowledge_base_index")
-CATALOG = os.environ.get("CATALOG", "serverless_nal_catalog")
+LLM_ENDPOINT = os.environ["LLM_ENDPOINT"]
+VS_INDEX = os.environ["VS_INDEX"]
+CATALOG = os.environ["CATALOG"]
 
 
 @dataclass
@@ -198,7 +198,7 @@ def step_rules_retrieval(rfq: dict) -> dict:
     try:
         from databricks.vector_search.client import VectorSearchClient
         vsc = VectorSearchClient(disable_notice=True)
-        idx = vsc.get_index(endpoint_name=os.environ.get("VS_ENDPOINT", "nalvs"),
+        idx = vsc.get_index(endpoint_name=os.environ["VS_ENDPOINT"],
                             index_name=VS_INDEX)
         query_text = f"{rfq['commodity_code']} {rfq['origin_iata']}-{rfq['destination_iata']} handling rate pricing"
         results = idx.similarity_search(

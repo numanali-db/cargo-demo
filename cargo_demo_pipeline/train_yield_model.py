@@ -3,7 +3,7 @@
 # MAGIC # Cargo Yield Model — Training & Registration
 # MAGIC
 # MAGIC Trains a gradient-boosted yield model on `cargo_silver.awb_enriched` and registers it in Unity Catalog
-# MAGIC as `serverless_nal_catalog.cargo_ai.yield_model`. Logged via MLflow for full traceability.
+# MAGIC as `<catalog>.cargo_ai.yield_model`. Logged via MLflow for full traceability.
 
 # COMMAND ----------
 
@@ -21,7 +21,9 @@ from mlflow.models.signature import infer_signature
 
 mlflow.set_registry_uri("databricks-uc")
 
-CATALOG = "serverless_nal_catalog"
+dbutils.widgets.text("catalog", "", "Unity Catalog name")
+CATALOG = dbutils.widgets.get("catalog")
+assert CATALOG, "Set the `catalog` widget"
 MODEL_NAME = f"{CATALOG}.cargo_ai.yield_model"
 
 # COMMAND ----------

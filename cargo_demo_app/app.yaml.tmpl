@@ -1,0 +1,17 @@
+command: ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+env:
+  - name: DATABRICKS_WAREHOUSE_ID
+    value: "${WAREHOUSE_ID}"
+  - name: CATALOG
+    value: "${CATALOG}"
+  - name: LLM_ENDPOINT
+    value: "${LLM_ENDPOINT}"
+  - name: VS_ENDPOINT
+    value: "${VS_ENDPOINT}"
+  - name: VS_INDEX
+    value: "${CATALOG}.cargo_ai.knowledge_base_index"
+  - name: GENIE_SPACE_ID
+    value: "${GENIE_SPACE_ID}"
+  - name: AGENT_ENDPOINT
+    value: "${AGENT_ENDPOINT}"

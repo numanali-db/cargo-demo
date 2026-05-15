@@ -6,7 +6,9 @@
 
 # COMMAND ----------
 
-CATALOG = "serverless_nal_catalog"
+dbutils.widgets.text("catalog", "", "Unity Catalog name")
+CATALOG = dbutils.widgets.get("catalog")
+assert CATALOG, "Set the `catalog` widget"
 
 checks = [
     ("awb_count > 0",

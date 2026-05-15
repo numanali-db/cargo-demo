@@ -25,8 +25,8 @@ from databricks.sdk import WorkspaceClient
 
 from .db import query, CATALOG
 
-GENIE_SPACE_ID = os.environ.get("GENIE_SPACE_ID", "01f14df56bd21782be011a99ee0c80d2")
-AGENT_ENDPOINT = os.environ.get("AGENT_ENDPOINT", "cargo-yield-agent")
+GENIE_SPACE_ID = os.environ.get("GENIE_SPACE_ID", "")
+AGENT_ENDPOINT = os.environ["AGENT_ENDPOINT"]
 
 app = FastAPI(title="Virgin Atlantic Cargo Yield Agent")
 

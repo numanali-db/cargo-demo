@@ -3,7 +3,7 @@
 # MAGIC # Cargo Yield Agent — MLflow PyFunc Registration & Deployment
 # MAGIC
 # MAGIC Wraps the 5-step Cargo Yield Agent as a `mlflow.pyfunc.PythonModel`, registers it in Unity Catalog
-# MAGIC as `serverless_nal_catalog.cargo_ai.yield_agent`, then deploys it as a Model Serving endpoint.
+# MAGIC as `<catalog>.cargo_ai.yield_agent`, then deploys it as a Model Serving endpoint.
 # MAGIC
 # MAGIC The agent calls:
 # MAGIC - SQL warehouse (Statement Execution API) for capacity, historical yield, competitor data
@@ -36,12 +36,22 @@ except ImportError:
 
 mlflow.set_registry_uri("databricks-uc")
 
-CATALOG = "serverless_nal_catalog"
+dbutils.widgets.text("catalog", "", "Unity Catalog name")
+dbutils.widgets.text("warehouse_id", "", "SQL warehouse ID")
+dbutils.widgets.text("vs_endpoint", "", "Vector Search endpoint")
+dbutils.widgets.text("llm_endpoint", "databricks-claude-sonnet-4-6", "Foundation Model endpoint")
+dbutils.widgets.text("yield_model_endpoint", "cargo-yield-model", "Yield model serving endpoint")
+
+CATALOG = dbutils.widgets.get("catalog")
+WAREHOUSE_ID = dbutils.widgets.get("warehouse_id")
+VS_ENDPOINT = dbutils.widgets.get("vs_endpoint")
+LLM_ENDPOINT = dbutils.widgets.get("llm_endpoint")
+YIELD_MODEL_ENDPOINT = dbutils.widgets.get("yield_model_endpoint")
+
+assert CATALOG and WAREHOUSE_ID and VS_ENDPOINT, \
+    "Set widgets: catalog, warehouse_id, vs_endpoint"
+
 AGENT_NAME = f"{CATALOG}.cargo_ai.yield_agent"
-WAREHOUSE_ID = "410652ea4402d5bf"
-YIELD_MODEL_ENDPOINT = "cargo-yield-model"
-LLM_ENDPOINT = "databricks-claude-sonnet-4-6"
-VS_ENDPOINT = "nalvs"
 VS_INDEX = f"{CATALOG}.cargo_ai.knowledge_base_index"
 
 # COMMAND ----------
@@ -55,11 +65,12 @@ import mlflow.pyfunc
 import pandas as pd
 from databricks.sdk import WorkspaceClient
 
-CATALOG = "serverless_nal_catalog"
-WAREHOUSE_ID = "410652ea4402d5bf"
-YIELD_MODEL_ENDPOINT = "cargo-yield-model"
-LLM_ENDPOINT = "databricks-claude-sonnet-4-6"
-VS_ENDPOINT = "nalvs"
+# These five constants are baked in at build time by build_agent.py
+CATALOG = "__CATALOG__"
+WAREHOUSE_ID = "__WAREHOUSE_ID__"
+YIELD_MODEL_ENDPOINT = "__YIELD_MODEL_ENDPOINT__"
+LLM_ENDPOINT = "__LLM_ENDPOINT__"
+VS_ENDPOINT = "__VS_ENDPOINT__"
 VS_INDEX = f"{CATALOG}.cargo_ai.knowledge_base_index"
 
 
@@ -354,9 +365,17 @@ class CargoYieldAgent(mlflow.pyfunc.PythonModel):
 mlflow.models.set_model(CargoYieldAgent())
 '''
 
-# Write the agent source to a temp file MLflow can serialize
+# Inject build-time values into the agent source, then write to a temp file MLflow can serialize.
+agent_source = (
+    CARGO_AGENT_CODE
+    .replace("__CATALOG__", CATALOG)
+    .replace("__WAREHOUSE_ID__", WAREHOUSE_ID)
+    .replace("__YIELD_MODEL_ENDPOINT__", YIELD_MODEL_ENDPOINT)
+    .replace("__LLM_ENDPOINT__", LLM_ENDPOINT)
+    .replace("__VS_ENDPOINT__", VS_ENDPOINT)
+)
 with open("/tmp/cargo_agent_model.py", "w") as f:
-    f.write(CARGO_AGENT_CODE)
+    f.write(agent_source)
 
 print("Agent source written.")
 
