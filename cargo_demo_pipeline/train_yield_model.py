@@ -22,7 +22,9 @@ from mlflow.models.signature import infer_signature
 mlflow.set_registry_uri("databricks-uc")
 
 dbutils.widgets.text("catalog", "", "Unity Catalog name")
+dbutils.widgets.text("yield_model_endpoint", "cargo-yield-model", "Yield model serving endpoint")
 CATALOG = dbutils.widgets.get("catalog")
+YIELD_MODEL_ENDPOINT = dbutils.widgets.get("yield_model_endpoint")
 assert CATALOG, "Set the `catalog` widget"
 MODEL_NAME = f"{CATALOG}.cargo_ai.yield_model"
 
@@ -126,3 +128,42 @@ client.set_registered_model_alias(
 )
 print(f"Set alias 'production' → version {new_version}")
 print(f"MODEL_VERSION={new_version}")
+
+# COMMAND ----------
+# MAGIC %md
+# MAGIC ## Deploy to Model Serving
+
+# COMMAND ----------
+
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.serving import EndpointCoreConfigInput, ServedEntityInput
+
+w = WorkspaceClient()
+
+served_entity = ServedEntityInput(
+    entity_name=MODEL_NAME,
+    entity_version=str(new_version),
+    workload_size="Small",
+    scale_to_zero_enabled=True,
+)
+
+try:
+    w.serving_endpoints.get(YIELD_MODEL_ENDPOINT)
+    exists = True
+except Exception:
+    exists = False
+
+if exists:
+    print(f"Updating endpoint {YIELD_MODEL_ENDPOINT} -> version {new_version} (waiting)...")
+    w.serving_endpoints.update_config_and_wait(
+        name=YIELD_MODEL_ENDPOINT,
+        served_entities=[served_entity],
+    )
+else:
+    print(f"Creating endpoint {YIELD_MODEL_ENDPOINT} -> version {new_version} (waiting)...")
+    w.serving_endpoints.create_and_wait(
+        name=YIELD_MODEL_ENDPOINT,
+        config=EndpointCoreConfigInput(served_entities=[served_entity]),
+    )
+
+print(f"Endpoint {YIELD_MODEL_ENDPOINT} ready.")

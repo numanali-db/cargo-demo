@@ -41,12 +41,14 @@ dbutils.widgets.text("warehouse_id", "", "SQL warehouse ID")
 dbutils.widgets.text("vs_endpoint", "", "Vector Search endpoint")
 dbutils.widgets.text("llm_endpoint", "databricks-claude-sonnet-4-6", "Foundation Model endpoint")
 dbutils.widgets.text("yield_model_endpoint", "cargo-yield-model", "Yield model serving endpoint")
+dbutils.widgets.text("agent_endpoint", "cargo-yield-agent", "Agent serving endpoint")
 
 CATALOG = dbutils.widgets.get("catalog")
 WAREHOUSE_ID = dbutils.widgets.get("warehouse_id")
 VS_ENDPOINT = dbutils.widgets.get("vs_endpoint")
 LLM_ENDPOINT = dbutils.widgets.get("llm_endpoint")
 YIELD_MODEL_ENDPOINT = dbutils.widgets.get("yield_model_endpoint")
+AGENT_ENDPOINT = dbutils.widgets.get("agent_endpoint")
 
 assert CATALOG and WAREHOUSE_ID and VS_ENDPOINT, \
     "Set widgets: catalog, warehouse_id, vs_endpoint"
@@ -450,7 +452,52 @@ client.set_registered_model_alias(name=AGENT_NAME, alias="production", version=a
 print(f"Alias 'production' -> version {agent_version}")
 
 # COMMAND ----------
+# MAGIC %md
+# MAGIC ## Deploy to Model Serving
+# MAGIC
+# MAGIC Create or update the serving endpoint pointing at the new agent version.
+
+# COMMAND ----------
+
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.serving import (
+    EndpointCoreConfigInput,
+    ServedEntityInput,
+)
+
+w = WorkspaceClient()
+
+served_entity = ServedEntityInput(
+    entity_name=AGENT_NAME,
+    entity_version=str(agent_version),
+    workload_size="Small",
+    scale_to_zero_enabled=True,
+)
+
+try:
+    w.serving_endpoints.get(AGENT_ENDPOINT)
+    exists = True
+except Exception:
+    exists = False
+
+if exists:
+    print(f"Updating endpoint {AGENT_ENDPOINT} -> version {agent_version} (waiting)...")
+    w.serving_endpoints.update_config_and_wait(
+        name=AGENT_ENDPOINT,
+        served_entities=[served_entity],
+    )
+else:
+    print(f"Creating endpoint {AGENT_ENDPOINT} -> version {agent_version} (waiting)...")
+    w.serving_endpoints.create_and_wait(
+        name=AGENT_ENDPOINT,
+        config=EndpointCoreConfigInput(served_entities=[served_entity]),
+    )
+
+print(f"Endpoint {AGENT_ENDPOINT} ready.")
+
+# COMMAND ----------
 
 print(f"\nAGENT_VERSION={agent_version}")
 print(f"AGENT_URI={info.model_uri}")
 print(f"AGENT_NAME={AGENT_NAME}")
+print(f"AGENT_ENDPOINT={AGENT_ENDPOINT}")
