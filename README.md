@@ -38,13 +38,14 @@ cp .env.example .env
 ./scripts/render.sh
 ```
 
-`scripts/render.sh` reads `.env` and produces:
+`scripts/render.sh` reads `.env` and:
 
-- `build/sql/*.sql` — SQL files with placeholders substituted
-- `cargo_demo_app/app.yaml` — app manifest with env values for the Databricks Apps runtime
+- Generates `build/sql/*.sql` (gitignored) — SQL files with placeholders substituted
+- Substitutes placeholders in `cargo_demo_app/app.yaml` **in place** (the file is tracked because Databricks Apps requires a real `app.yaml` in the source tree)
 
-`.env` and the rendered outputs are gitignored, so you can commit changes without
-leaking workspace details. Re-run `scripts/render.sh` whenever you edit `.env`.
+`.env` is gitignored. After deploying via CLI, revert your local `app.yaml`
+edits with `git checkout cargo_demo_app/app.yaml` so workspace values don't
+leak into commits.
 
 The Python notebooks in `cargo_demo_pipeline/` use `dbutils.widgets` instead of
 envsubst — pass the same values as job parameters or set them interactively in the
@@ -129,10 +130,32 @@ Run `cargo_demo_pipeline/build_agent.py` as a notebook. Set widgets: `catalog`,
 
 ### 8. Deploy the Databricks App
 
+Two deploy flows are supported. Pick one.
+
+**Option A — CLI deploy (recommended for local development)**
+
+`scripts/render.sh` substitutes the placeholders in `cargo_demo_app/app.yaml`
+with values from `.env`, then you deploy:
+
 ```bash
+./scripts/render.sh   # substitutes ${CATALOG}, ${WAREHOUSE_ID}, ... in app.yaml
 databricks apps create "$APP_NAME"
 databricks apps deploy "$APP_NAME" --source-code-path "$(pwd)/cargo_demo_app"
+git checkout cargo_demo_app/app.yaml   # revert local substitutions
 ```
+
+**Option B — Deploy from GitHub source**
+
+The committed `cargo_demo_app/app.yaml` contains `${VAR}` placeholders. When
+Databricks Apps pulls from GitHub, those literal strings become the default env
+values — you need to override them in the workspace UI:
+
+1. Create the app pointing at your GitHub repo, with source path `cargo_demo_app/`.
+2. Once created, open the app → **Settings → Environment Variables**.
+3. Set each variable (`CATALOG`, `DATABRICKS_WAREHOUSE_ID`, `LLM_ENDPOINT`,
+   `VS_ENDPOINT`, `VS_INDEX`, `GENIE_SPACE_ID`, `AGENT_ENDPOINT`) to your
+   workspace values. Workspace UI values override `app.yaml`.
+4. Restart the app.
 
 ### 9. Grant the app permission to read your tables
 
@@ -171,7 +194,7 @@ cargo-yield-agent/
 │   ├── build_agent.py
 │   └── run_quality_checks.py
 └── cargo_demo_app/
-    ├── app.yaml.tmpl             # Source of truth — app.yaml is generated
+    ├── app.yaml                  # Committed with ${VAR} placeholders; CLI render fills them in
     ├── requirements.txt
     ├── backend/                  # All values from env vars (set in app.yaml)
     └── static/

@@ -5,10 +5,16 @@
 #   .env at repo root (copy from .env.example)
 #
 # Outputs:
-#   build/sql/*.sql               - rendered SQL from sql/*.sql
-#   cargo_demo_app/app.yaml       - rendered from cargo_demo_app/app.yaml.tmpl
+#   build/sql/*.sql           - rendered SQL from sql/*.sql (gitignored)
+#   cargo_demo_app/app.yaml   - ${VAR} placeholders substituted in place (TRACKED)
 #
-# Re-run after editing .env. Both outputs are gitignored.
+# Note: cargo_demo_app/app.yaml IS committed because Databricks Apps requires a
+# real app.yaml in the source repo (no template rendering at deploy time).
+# The committed file uses ${VAR} placeholders. For GitHub-source deploys, set the
+# actual env values via the workspace UI (Variables tab) which override app.yaml.
+# For CLI deploys, render.sh substitutes values from .env — don't commit those.
+#
+# Re-run after editing .env.
 
 set -euo pipefail
 
@@ -63,8 +69,12 @@ if [[ -z "$APP_SP_ID" ]]; then
   echo "        Deploy the app first, then set APP_SP_ID and re-run scripts/render.sh."
 fi
 
-# --- Render app.yaml ---
-envsubst "$SUBST_VARS" < cargo_demo_app/app.yaml.tmpl > cargo_demo_app/app.yaml
+# --- Render app.yaml (substitute placeholders in place) ---
+tmp="$(mktemp)"
+envsubst "$SUBST_VARS" < cargo_demo_app/app.yaml > "$tmp"
+mv "$tmp" cargo_demo_app/app.yaml
 echo "  rendered: cargo_demo_app/app.yaml"
+echo "  note: cargo_demo_app/app.yaml is tracked. Do NOT commit your local values."
+echo "        After deploying, run: git checkout cargo_demo_app/app.yaml"
 
 echo "Done."
