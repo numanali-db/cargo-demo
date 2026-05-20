@@ -345,6 +345,87 @@ tr.selected { background: rgba(225,10,10,0.05); }
 .payback .text .p { font-size: 13px; opacity: 0.92; margin-top: 4px; }
 .payback .number-big { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; }
 
+/* ===== Manual Process tab ===== */
+.mp-hero {
+  background: linear-gradient(135deg, #0F1115 0%, #1A1D24 100%);
+  color: #fff; border-radius: 12px; overflow: hidden;
+  display: grid; grid-template-columns: 1fr 280px; gap: 0;
+  margin-bottom: 18px;
+}
+.mp-hero .left { padding: 28px 32px; }
+.mp-hero .eyebrow { color: #9AA0A6; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+.mp-hero h2 { font-size: 28px; font-weight: 800; line-height: 1.15; color: #fff; margin: 0 0 10px; }
+.mp-hero .sub { color: #C5C8CC; font-size: 14px; max-width: 580px; }
+.mp-hero .clock-card {
+  background: #22252D; padding: 22px 18px; border-left: 1px solid #2A2E37;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+}
+.mp-hero .clock-card .label { color: #9AA0A6; font-size: 10px; letter-spacing: 2px; }
+.mp-hero .clock-card .time {
+  font-family: 'DM Mono', monospace; font-size: 48px; font-weight: 800; color: #fff;
+  font-variant-numeric: tabular-nums; margin-top: 8px;
+}
+.mp-hero .clock-card .note { color: var(--va-red); font-size: 12px; font-weight: 600; margin-top: 6px; }
+
+.mp-image-wrap {
+  border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden;
+  background: #0F1115; margin-bottom: 18px;
+}
+.mp-image-wrap img { width: 100%; display: block; }
+
+.mp-steps { display: grid; gap: 12px; margin-bottom: 18px; }
+.mp-step {
+  display: grid; grid-template-columns: 64px 1fr 92px; gap: 16px; align-items: stretch;
+  background: white; border: 1px solid var(--gray-200); border-radius: 10px;
+  padding: 14px 18px; transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.mp-step:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.mp-step .num {
+  font-size: 28px; font-weight: 800; color: var(--va-red); line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+.mp-step .body h4 { font-size: 14px; font-weight: 700; color: var(--ink); margin: 0 0 4px; }
+.mp-step .body .system {
+  display: inline-block; background: var(--gray-100); padding: 2px 8px;
+  border-radius: 3px; font-family: 'DM Mono', monospace; font-size: 10.5px;
+  color: var(--gray-700); margin-bottom: 6px;
+}
+.mp-step .body p { font-size: 12.5px; color: var(--gray-700); margin: 0; }
+.mp-step .body .pain {
+  font-size: 11.5px; color: var(--red); margin-top: 6px; font-style: italic;
+}
+.mp-step .clk {
+  text-align: right; font-family: 'DM Mono', monospace;
+  display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
+}
+.mp-step .clk .delta { color: var(--gray-500); font-size: 11px; }
+.mp-step .clk .total { color: var(--ink); font-weight: 700; font-size: 18px; font-variant-numeric: tabular-nums; }
+
+.mp-multiplier {
+  background: #FFF7E6; border: 1px solid #F5C16C; border-radius: 10px;
+  padding: 18px 22px; margin-bottom: 18px; display: grid; grid-template-columns: 1fr auto; gap: 16px;
+}
+.mp-multiplier .h { font-size: 16px; font-weight: 700; color: #7A4E00; margin-bottom: 4px; }
+.mp-multiplier p { font-size: 13px; color: #7A4E00; }
+.mp-multiplier .big {
+  font-size: 36px; font-weight: 800; color: #7A4E00; line-height: 1; align-self: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.mp-vs {
+  background: linear-gradient(135deg, #0F2D1A 0%, #133D24 100%);
+  color: #fff; border-radius: 12px; padding: 22px 28px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: center;
+  margin-bottom: 12px;
+}
+.mp-vs .col .lbl { font-size: 10px; letter-spacing: 2px; color: #B8D6C2; text-transform: uppercase; }
+.mp-vs .col .v { font-size: 28px; font-weight: 800; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.mp-vs .col .d { font-size: 12px; color: #B8D6C2; margin-top: 4px; }
+.mp-vs .col.before .v { color: #FF8B8B; }
+.mp-vs .col.after .v { color: #5DC081; }
+.mp-vs a { color: #fff; font-weight: 600; text-decoration: underline; }
+
 </style>
 </head>
 <body>
@@ -357,7 +438,8 @@ tr.selected { background: rgba(225,10,10,0.05); }
 </header>
 
 <div class="tabs">
-  <div class="tab active" data-tab="inbox">RFQ Inbox <span id="rfq-count" class="badge" style="background: var(--va-red); color: white; padding: 2px 8px; margin-left: 6px; border-radius: 10px; font-size: 11px;">0</span></div>
+  <div class="tab active" data-tab="manual">The Manual Process</div>
+  <div class="tab" data-tab="inbox">RFQ Inbox <span id="rfq-count" class="badge" style="background: var(--va-red); color: white; padding: 2px 8px; margin-left: 6px; border-radius: 10px; font-size: 11px;">0</span></div>
   <div class="tab" data-tab="analytics">Analytics</div>
   <div class="tab" data-tab="forwarders">Forwarders</div>
   <div class="tab" data-tab="genie">Ask Genie</div>
@@ -366,7 +448,122 @@ tr.selected { background: rgba(225,10,10,0.05); }
 </div>
 
 <main>
-  <div id="view-inbox">
+  <div id="view-manual">
+    <div class="mp-hero">
+      <div class="left">
+        <div class="eyebrow">Monday · 09:00 · Cargo Yield Desk</div>
+        <h2>One RFQ. Five systems. Twenty-two minutes.</h2>
+        <div class="sub">A typical morning at the yield desk: a forwarder fires an RFQ into the inbox and gives the analyst 30 minutes to come back with a confirmed quote. Here's what answering <em>one</em> of them looks like today. Now multiply by 80 in the inbox.</div>
+      </div>
+      <div class="clock-card">
+        <div class="label">TIME PER RFQ</div>
+        <div class="time" id="mp-clock">22:14</div>
+        <div class="note">+ 79 still in inbox</div>
+      </div>
+    </div>
+
+    <div class="mp-image-wrap">
+      <img src="/static/manual_process_hero.svg" alt="Cluttered desktop showing 5 legacy systems an analyst juggles to quote a single cargo RFQ" />
+    </div>
+
+    <div class="mp-steps">
+      <div class="mp-step">
+        <div class="num">1</div>
+        <div class="body">
+          <h4>Look up the flight capacity</h4>
+          <span class="system">Cargo iQ · web portal · separate login</span>
+          <p>Find VS103 LHR-DEL on 28-May. Capacity 22,000 kg. Booked 17,160 kg. Trending to sellout.</p>
+          <div class="pain">⚠ Session times out every 15 min. Trend data lives in ORS — different system, different login.</div>
+        </div>
+        <div class="clk"><div class="delta">+ 2:30</div><div class="total">02:30</div></div>
+      </div>
+
+      <div class="mp-step">
+        <div class="num">2</div>
+        <div class="body">
+          <h4>Pull lane history</h4>
+          <span class="system">LaneRateCard_FY26.xlsx · OneDrive · 38s recalc</span>
+          <p>Pivot the workbook by lane × commodity × forwarder. Last 90 days. £3.21 avg on the lane. £3.08 for DSV specifically.</p>
+          <div class="pain">⚠ Last refreshed 4 days ago. Different analysts maintain different versions. No one trusts the numbers fully.</div>
+        </div>
+        <div class="clk"><div class="delta">+ 3:45</div><div class="total">06:15</div></div>
+      </div>
+
+      <div class="mp-step">
+        <div class="num">3</div>
+        <div class="body">
+          <h4>Check competitor pricing</h4>
+          <span class="system">competitor-rates-may-2026.pdf · emailed weekly</span>
+          <p>Ctrl-F through 28 pages for LHR-DEL PHC. IAG £3.35. Lufthansa £3.42. Emirates £3.28. We need to be competitive.</p>
+          <div class="pain">⚠ PDF is 14 days old. Real-time scrape exists but only commercial leadership sees it.</div>
+        </div>
+        <div class="clk"><div class="delta">+ 4:25</div><div class="total">10:40</div></div>
+      </div>
+
+      <div class="mp-step">
+        <div class="num">4</div>
+        <div class="body">
+          <h4>Confirm handling rules</h4>
+          <span class="system">Pharma_SOP_v7.docx · SharePoint · 42 pages</span>
+          <p>Verify DEL is CEIV Pharma certified. Confirm active container availability. Check the 60-minute tarmac SLA. Pull the right premium clause.</p>
+          <div class="pain">⚠ Different SOPs for AVI, DGR, perishables. New hires take 6 months to know which file to open.</div>
+        </div>
+        <div class="clk"><div class="delta">+ 4:15</div><div class="total">14:55</div></div>
+      </div>
+
+      <div class="mp-step">
+        <div class="num">5</div>
+        <div class="body">
+          <h4>Email manager for sign-off</h4>
+          <span class="system">Outlook · approval thread</span>
+          <p>"Suggest £3.18, slightly under IAG. Pharma premium applied. DSV is Platinum so 12% off card." Wait 4 minutes for a reply: "Try £3.30, push them on volume commitment."</p>
+          <div class="pain">⚠ Manager is in another timezone half the week. Junior analysts won't quote &gt; £3.00 unaided.</div>
+        </div>
+        <div class="clk"><div class="delta">+ 4:35</div><div class="total">19:30</div></div>
+      </div>
+
+      <div class="mp-step">
+        <div class="num">6</div>
+        <div class="body">
+          <h4>Reply to the forwarder</h4>
+          <span class="system">Outlook · type the quote · attach Ts &amp; Cs</span>
+          <p>Compose reply. Paste the rate. Attach the T&amp;Cs. Send.</p>
+          <div class="pain">⚠ Forwarder already accepted IAG 6 minutes ago. Lost booking. ~ £6,200 revenue gone.</div>
+        </div>
+        <div class="clk"><div class="delta">+ 2:44</div><div class="total">22:14</div></div>
+      </div>
+    </div>
+
+    <div class="mp-multiplier">
+      <div>
+        <div class="h">Now multiply by 80 RFQs/day across 3 analysts.</div>
+        <p>That's ~88 person-hours/day on routine quoting alone. Premium / AOG / pharma bookings get the same 22 minutes as a £400 general-cargo job. ~20% of high-yield RFQs are quoted too slowly and lost to faster carriers.</p>
+      </div>
+      <div class="big">~£2.4M / yr</div>
+    </div>
+
+    <div class="mp-vs">
+      <div class="col before">
+        <div class="lbl">Today</div>
+        <div class="v">22 min</div>
+        <div class="d">analyst-driven · 5 systems · stale data · gut-feel premium</div>
+      </div>
+      <div class="col after">
+        <div class="lbl">With the Cargo Yield Agent</div>
+        <div class="v">1.4 sec</div>
+        <div class="d">capacity-aware · ML-predicted · auto-benchmarked · full audit trail · sent before the analyst opens Outlook</div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 18px;">
+      <a href="#" onclick="document.querySelector('[data-tab=inbox]').click(); return false;"
+         style="color: var(--va-red); font-weight: 600; text-decoration: none; font-size: 14px;">
+        See it in action — open the RFQ Inbox →
+      </a>
+    </div>
+  </div>
+
+  <div id="view-inbox" style="display:none;">
     <div class="kpi-grid" id="kpi-grid">
       <div class="kpi-card"><div class="label">Cargo Revenue (last 30d)</div><div class="value" id="kpi-revenue">&mdash;</div><div class="delta" id="kpi-revenue-delta"></div></div>
       <div class="kpi-card"><div class="label">Tonnage (last 30d)</div><div class="value" id="kpi-tonnage">&mdash;</div></div>

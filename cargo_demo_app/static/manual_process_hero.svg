@@ -1,0 +1,165 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0F1115"/>
+      <stop offset="1" stop-color="#1A1D24"/>
+    </linearGradient>
+    <linearGradient id="winChrome" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F5F5F7"/>
+      <stop offset="1" stop-color="#E4E4E8"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.35"/>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#252830" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="640" fill="url(#bg)"/>
+  <rect width="1200" height="640" fill="url(#grid)"/>
+
+  <!-- Title bar -->
+  <text x="60" y="60" fill="#9AA0A6" font-size="13" letter-spacing="2">MONDAY · 09:00 · CARGO YIELD DESK</text>
+  <text x="60" y="100" fill="#FFFFFF" font-size="32" font-weight="700">One RFQ. Five systems. Twenty-two minutes.</text>
+  <text x="60" y="128" fill="#9AA0A6" font-size="15">A typical morning at the cargo yield desk. Now multiply by 80 RFQs in the inbox.</text>
+
+  <!-- Stacked windows (5) -->
+  <g transform="translate(60,170)" filter="url(#shadow)">
+    <!-- Window 5 (back) -->
+    <g transform="translate(280,160) rotate(-2)">
+      <rect width="540" height="260" rx="8" fill="#FFFFFF"/>
+      <rect width="540" height="32" rx="8" fill="url(#winChrome)"/>
+      <rect y="24" width="540" height="8" fill="url(#winChrome)"/>
+      <circle cx="14" cy="16" r="5" fill="#FF5F57"/>
+      <circle cx="32" cy="16" r="5" fill="#FEBC2E"/>
+      <circle cx="50" cy="16" r="5" fill="#28C840"/>
+      <text x="270" y="20" text-anchor="middle" fill="#3C4043" font-size="12" font-weight="500">Outlook — Inbox(80)</text>
+      <text x="20" y="64" fill="#202124" font-size="13" font-weight="600">RE: RFQ LHR-DEL Pharma 2,000kg</text>
+      <text x="20" y="86" fill="#5F6368" font-size="11">From: jane.choi@dsv.com · Required: confirmed quote by 09:30</text>
+      <line x1="20" y1="100" x2="520" y2="100" stroke="#E8EAED"/>
+      <text x="20" y="124" fill="#5F6368" font-size="11">Hi yield desk, please quote LHR-DEL 28-May VS103, 2000kg PHC,</text>
+      <text x="20" y="142" fill="#5F6368" font-size="11">2-8C, CEIV req. Customer needs response within 30 min — IAG</text>
+      <text x="20" y="160" fill="#5F6368" font-size="11">have already come back at £3.35.</text>
+      <text x="20" y="222" fill="#9AA0A6" font-size="10">↳ Re: also need quote on VS107 BLR · 1,200kg perish</text>
+      <text x="20" y="238" fill="#9AA0A6" font-size="10">↳ Re: AOG MAN-JFK part on next flight, urgent</text>
+    </g>
+
+    <!-- Window 4 -->
+    <g transform="translate(170,100) rotate(-1)">
+      <rect width="540" height="260" rx="8" fill="#FFFFFF"/>
+      <rect width="540" height="32" rx="8" fill="url(#winChrome)"/>
+      <rect y="24" width="540" height="8" fill="url(#winChrome)"/>
+      <circle cx="14" cy="16" r="5" fill="#FF5F57"/>
+      <circle cx="32" cy="16" r="5" fill="#FEBC2E"/>
+      <circle cx="50" cy="16" r="5" fill="#28C840"/>
+      <text x="270" y="20" text-anchor="middle" fill="#3C4043" font-size="12" font-weight="500">Pharma_SOP_v7.docx — SharePoint</text>
+      <rect x="20" y="50" width="500" height="22" fill="#F1F3F4"/>
+      <text x="32" y="66" fill="#202124" font-size="12" font-weight="700">3.2 LHR-DEL pharma corridor — handling requirements</text>
+      <text x="20" y="92" fill="#3C4043" font-size="11">• CEIV Pharma certification required at both stations (DEL: yes).</text>
+      <text x="20" y="110" fill="#3C4043" font-size="11">• Cool dolly priority. Maximum tarmac exposure: 60 minutes.</text>
+      <text x="20" y="128" fill="#3C4043" font-size="11">• Temp 2–8°C (CRT) or active container (Envirotainer / va-Q-tec).</text>
+      <text x="20" y="146" fill="#3C4043" font-size="11">• Premium 30–50% over GCR justified for cool-chain integrity.</text>
+      <text x="20" y="184" fill="#9AA0A6" font-size="10" font-style="italic">(scroll 14 more pages to find LHR-specific clauses…)</text>
+    </g>
+
+    <!-- Window 3 -->
+    <g transform="translate(60,40) rotate(1)">
+      <rect width="540" height="260" rx="8" fill="#FFFFFF"/>
+      <rect width="540" height="32" rx="8" fill="url(#winChrome)"/>
+      <rect y="24" width="540" height="8" fill="url(#winChrome)"/>
+      <circle cx="14" cy="16" r="5" fill="#FF5F57"/>
+      <circle cx="32" cy="16" r="5" fill="#FEBC2E"/>
+      <circle cx="50" cy="16" r="5" fill="#28C840"/>
+      <text x="270" y="20" text-anchor="middle" fill="#3C4043" font-size="12" font-weight="500">competitor-rates-may-2026.pdf · Adobe Acrobat</text>
+      <text x="20" y="60" fill="#202124" font-size="12" font-weight="700">May 2026 — Market Intel Scrape</text>
+      <text x="20" y="80" fill="#5F6368" font-size="10">Lane         Commodity   IAG    LH     EK     AF/KLM   Updated</text>
+      <line x1="20" y1="86" x2="520" y2="86" stroke="#E8EAED"/>
+      <text x="20" y="102" fill="#202124" font-size="10" font-family="DM Mono, monospace">LHR-DEL      PHC         £3.35  £3.42  £3.28  £3.40    14-May</text>
+      <text x="20" y="118" fill="#202124" font-size="10" font-family="DM Mono, monospace">LHR-DEL      GEN         £2.95  £3.05  £2.88  £3.02    14-May</text>
+      <text x="20" y="134" fill="#202124" font-size="10" font-family="DM Mono, monospace">LHR-BOM      PHC         £3.45  £3.50  £3.30  £3.48    14-May</text>
+      <text x="20" y="150" fill="#202124" font-size="10" font-family="DM Mono, monospace">LHR-BLR      PER         £3.62  —      £3.45  —        12-May</text>
+      <text x="20" y="180" fill="#D93025" font-size="11" font-weight="600">Find on page: "LHR-DEL PHC" · 1 of 14 matches</text>
+    </g>
+
+    <!-- Window 2 -->
+    <g transform="translate(20,-10) rotate(-2)">
+      <rect width="540" height="280" rx="8" fill="#FFFFFF"/>
+      <rect width="540" height="32" rx="8" fill="url(#winChrome)"/>
+      <rect y="24" width="540" height="8" fill="url(#winChrome)"/>
+      <circle cx="14" cy="16" r="5" fill="#FF5F57"/>
+      <circle cx="32" cy="16" r="5" fill="#FEBC2E"/>
+      <circle cx="50" cy="16" r="5" fill="#28C840"/>
+      <text x="270" y="20" text-anchor="middle" fill="#3C4043" font-size="12" font-weight="500">LaneRateCard_FY26.xlsx — Excel · Pivot</text>
+      <rect x="20" y="44" width="500" height="20" fill="#107C41"/>
+      <text x="32" y="58" fill="#FFFFFF" font-size="11" font-weight="600">A1: Filter: lane = LHR-DEL · commodity = PHC · forwarder = (all)</text>
+      <g font-family="DM Mono, monospace" font-size="10" fill="#202124">
+        <rect x="20" y="68" width="500" height="20" fill="#F1F3F4"/>
+        <text x="32" y="82">Forwarder              AWBs   Avg £/kg   90d Trend   Last Quote</text>
+        <text x="32" y="104">DSV Air &amp; Sea         147    3.08       ↗ +2.1%    3.12</text>
+        <text x="32" y="120">Kuehne+Nagel           132    3.14       ↗ +1.4%    3.11</text>
+        <text x="32" y="136">DHL Global             118    3.18       ↘ -0.6%    3.15</text>
+        <text x="32" y="152">CEVA                    61    3.22       ↗ +3.0%    3.24</text>
+        <text x="32" y="168">Other                  ...    ...         ...       ...</text>
+      </g>
+      <text x="20" y="208" fill="#9AA0A6" font-size="10">⚠ Workbook last refreshed: 4 days ago by m.patel</text>
+      <text x="20" y="226" fill="#9AA0A6" font-size="10">⚠ Pivot taking 38s to recalc on this laptop…</text>
+    </g>
+
+    <!-- Window 1 (front, Cargo iQ) -->
+    <g transform="translate(-40,-60) rotate(2)">
+      <rect width="540" height="280" rx="8" fill="#FFFFFF"/>
+      <rect width="540" height="32" rx="8" fill="url(#winChrome)"/>
+      <rect y="24" width="540" height="8" fill="url(#winChrome)"/>
+      <circle cx="14" cy="16" r="5" fill="#FF5F57"/>
+      <circle cx="32" cy="16" r="5" fill="#FEBC2E"/>
+      <circle cx="50" cy="16" r="5" fill="#28C840"/>
+      <text x="270" y="20" text-anchor="middle" fill="#3C4043" font-size="12" font-weight="500">Cargo iQ — Flight &amp; Capacity Lookup</text>
+      <rect x="20" y="50" width="500" height="32" fill="#1A73E8" rx="3"/>
+      <text x="32" y="70" fill="#FFFFFF" font-size="12" font-weight="600">Flight: VS103   ·   Date: 28-May-2026   ·   Lane: LHR → DEL</text>
+      <text x="20" y="108" fill="#5F6368" font-size="11">Aircraft</text>
+      <text x="200" y="108" fill="#202124" font-size="12" font-weight="600">B789-9 · 22,000 kg cargo capacity</text>
+      <text x="20" y="132" fill="#5F6368" font-size="11">Booked load</text>
+      <text x="200" y="132" fill="#202124" font-size="12" font-weight="600">17,160 kg (78%)</text>
+      <text x="20" y="156" fill="#5F6368" font-size="11">Available</text>
+      <text x="200" y="156" fill="#202124" font-size="12" font-weight="600">4,840 kg · sellout trend: high</text>
+      <rect x="20" y="180" width="500" height="14" fill="#E8EAED" rx="7"/>
+      <rect x="20" y="180" width="390" height="14" fill="#1A73E8" rx="7"/>
+      <text x="20" y="216" fill="#D93025" font-size="11" font-weight="600">⚠ Session about to time out (Cargo iQ sessions expire every 15 min)</text>
+      <text x="20" y="240" fill="#9AA0A6" font-size="10">Now switch to ORS for the historical capacity trend… (separate login)</text>
+    </g>
+  </g>
+
+  <!-- Right side: clock + stats -->
+  <g transform="translate(900,200)">
+    <rect width="240" height="280" rx="14" fill="#22252D" stroke="#3A3E48"/>
+    <text x="120" y="34" text-anchor="middle" fill="#9AA0A6" font-size="11" letter-spacing="2">TIME ON THIS RFQ</text>
+    <text x="120" y="100" text-anchor="middle" fill="#FFFFFF" font-size="56" font-weight="800" font-family="DM Mono, monospace">22:14</text>
+    <text x="120" y="124" text-anchor="middle" fill="#E10A0A" font-size="12" font-weight="600">+ 79 RFQs still in inbox</text>
+
+    <line x1="20" y1="148" x2="220" y2="148" stroke="#3A3E48"/>
+
+    <text x="20" y="172" fill="#9AA0A6" font-size="10">Systems opened</text>
+    <text x="220" y="172" text-anchor="end" fill="#FFFFFF" font-size="13" font-weight="700">5</text>
+
+    <text x="20" y="196" fill="#9AA0A6" font-size="10">Manager approvals waiting</text>
+    <text x="220" y="196" text-anchor="end" fill="#FFFFFF" font-size="13" font-weight="700">2</text>
+
+    <text x="20" y="220" fill="#9AA0A6" font-size="10">Forwarder timeout in</text>
+    <text x="220" y="220" text-anchor="end" fill="#FEBC2E" font-size="13" font-weight="700">7:46</text>
+
+    <text x="20" y="244" fill="#9AA0A6" font-size="10">IAG offered (already)</text>
+    <text x="220" y="244" text-anchor="end" fill="#FFFFFF" font-size="13" font-weight="700">£3.35/kg</text>
+
+    <text x="20" y="268" fill="#9AA0A6" font-size="10">Best guess so far</text>
+    <text x="220" y="268" text-anchor="end" fill="#9AA0A6" font-size="13" font-weight="500">??</text>
+  </g>
+
+  <!-- Footer comparison strip -->
+  <g transform="translate(60,540)">
+    <rect width="1080" height="74" rx="10" fill="#0F2D1A" stroke="#1F5A33"/>
+    <text x="24" y="32" fill="#5DC081" font-size="11" letter-spacing="2">WITH THE CARGO YIELD AGENT</text>
+    <text x="24" y="60" fill="#FFFFFF" font-size="22" font-weight="700">1.4 seconds.  Quote rationale.  Capacity-aware.  Already in the inbox.</text>
+    <text x="1056" y="46" text-anchor="end" fill="#5DC081" font-size="38" font-weight="800" font-family="DM Mono, monospace">−99.9%</text>
+  </g>
+</svg>
