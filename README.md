@@ -5,7 +5,49 @@ real time using historical yield, ML-predicted base rates, competitor intel, and
 handling rules from a vector-indexed knowledge base. Modeled on Virgin Atlantic
 Cargo's footprint (~200K tonnes / £236M revenue / 26K flights per year).
 
-The demo covers:
+## What is it?
+
+When a freight forwarder needs to ship a pallet of pharma from London to Delhi,
+they fire an RFQ (request for quote) to every airline that flies the lane. The
+airline's cargo team has minutes to come back with a rate that wins the booking
+without leaving money on the table. Today, a yield analyst answers each RFQ
+manually — pulling up flight load factors in one system, historical rates in
+another, the latest competitor scrape in a third, and the IATA handling rules
+in a PDF — then makes a judgement call.
+
+The Cargo Yield Agent automates that decision. For every inbound RFQ it runs a
+five-step pipeline:
+
+1. **Capacity check** — how full is the target flight, and how does this booking move the load factor?
+2. **Yield calculation** — an ML model predicts the base rate for this lane × commodity × forwarder × season, with the last 90 days of actuals as a sanity bound.
+3. **Competitive check** — compares the recommended rate against scraped competitor pricing on the same lane and commodity.
+4. **Rules retrieval** — pulls the relevant IATA / airline handling rules (pharma cool chain, AOG SLAs, dangerous-goods limits) from a vector-indexed knowledge base.
+5. **Quote drafting** — Claude synthesises a quote with a quantitative rationale the analyst can sign off on or override.
+
+Every run produces an MLflow trace so the analyst can see exactly why the agent
+recommended £3.42/kg and not £3.10 — capacity, history, competitors, rules.
+
+## Why airlines should care
+
+Cargo is high-margin, high-volatility, and famously underautomated. A 1–2% yield
+lift on the back of a £200M cargo book is £2–4M of pure margin per year, with no
+capex and no new aircraft. The levers the agent pulls — capacity-aware pricing,
+faster RFQ turnaround, consistent competitive positioning — directly attack the
+same problems every cargo team has:
+
+- **Speed** — AOG and pharma RFQs need a confirmed quote in under 30 minutes. Analysts on Mondays at 0800 can't realistically clear an inbox of 80 RFQs that fast. The agent answers in seconds and routes only the strategic / unusual ones to a human.
+- **Yield discipline** — manual quoting drifts. Two analysts on the same desk will price the same LHR–JFK pharma booking differently. The agent enforces the same logic every time and makes the deviation auditable.
+- **Capacity utilisation** — when a flight is 82% full and trending to a sellout, the agent automatically pushes the capacity premium; when it's 50% full with 5 days to depart, it discounts tactically to fill the belly. Most airlines do this by gut.
+- **Competitive responsiveness** — when IAG Cargo cuts £0.30 on LHR–BOM pharma overnight, the agent sees it the next morning and adjusts. No one has to remember to check.
+- **Premium cargo focus** — the highest-yield commodities (pharma, perishables, AOG, valuables) have the strictest handling rules. Surfacing those rules at quote time prevents the most expensive class of mistake: accepting cargo the aircraft can't actually carry.
+
+For Databricks-side stakeholders: this demo is a worked example of pulling
+**Lakeflow, Unity Catalog, Model Serving, Vector Search, Foundation Model API,
+Genie, and Databricks Apps** into a single agentic workflow on real airline-shaped
+data — useful for any conversation with a logistics, airline, or distribution
+customer where pricing, capacity, or quoting is on the table.
+
+## What's in this repo
 
 - **Synthetic data generator** — 1M+ AWBs, flight schedules, forwarders, competitor rates
 - **Lakeflow Declarative Pipeline** — bronze → silver → gold with DQ expectations
