@@ -426,6 +426,50 @@ tr.selected { background: rgba(225,10,10,0.05); }
 .mp-vs .col.after .v { color: #5DC081; }
 .mp-vs a { color: #fff; font-weight: 600; text-decoration: underline; }
 
+/* ===== Configuration tab ===== */
+.cfg-header { margin-bottom: 18px; }
+.cfg-header h2 { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+.cfg-header p { color: var(--gray-500); font-size: 13px; max-width: 620px; }
+.cfg-active {
+  background: linear-gradient(135deg, var(--va-red) 0%, var(--va-purple) 100%);
+  color: #fff; border-radius: 10px; padding: 18px 22px; margin-bottom: 18px;
+  display: grid; grid-template-columns: 64px 1fr auto; gap: 16px; align-items: center;
+}
+.cfg-active .lg {
+  width: 56px; height: 56px; border-radius: 8px; background: rgba(255,255,255,0.18);
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 22px;
+}
+.cfg-active .meta .lbl { font-size: 10px; letter-spacing: 2px; opacity: 0.85; }
+.cfg-active .meta .nm { font-size: 22px; font-weight: 700; margin-top: 2px; }
+.cfg-active .meta .sub { font-size: 12px; opacity: 0.92; margin-top: 4px; }
+.cfg-active .stats { text-align: right; font-size: 12px; opacity: 0.95; }
+.cfg-active .stats .v { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.cfg-search {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--gray-200); border-radius: 8px;
+  font-size: 14px; font-family: inherit; margin-bottom: 16px;
+}
+.cfg-search:focus { outline: 2px solid var(--va-red); outline-offset: -1px; border-color: transparent; }
+
+.airline-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px;
+}
+.airline-card {
+  display: grid; grid-template-columns: 52px 1fr; gap: 12px;
+  background: white; border: 1.5px solid var(--gray-200); border-radius: 10px;
+  padding: 14px; cursor: pointer; transition: all 0.12s ease;
+}
+.airline-card:hover { border-color: var(--gray-300); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+.airline-card.active { border-color: var(--va-red); box-shadow: 0 0 0 2px rgba(225,10,10,0.15); }
+.airline-card .lg {
+  width: 52px; height: 52px; border-radius: 8px; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 18px; letter-spacing: -0.02em;
+}
+.airline-card .name { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 2px; line-height: 1.25; }
+.airline-card .hub { font-size: 11px; color: var(--gray-500); font-family: 'DM Mono', monospace; margin-bottom: 4px; }
+.airline-card .rev { font-size: 11.5px; color: var(--gray-700); font-variant-numeric: tabular-nums; }
+
 </style>
 </head>
 <body>
@@ -438,7 +482,8 @@ tr.selected { background: rgba(225,10,10,0.05); }
 </header>
 
 <div class="tabs">
-  <div class="tab active" data-tab="manual">The Manual Process</div>
+  <div class="tab active" data-tab="config">Configuration</div>
+  <div class="tab" data-tab="manual">The Manual Process</div>
   <div class="tab" data-tab="inbox">RFQ Inbox <span id="rfq-count" class="badge" style="background: var(--va-red); color: white; padding: 2px 8px; margin-left: 6px; border-radius: 10px; font-size: 11px;">0</span></div>
   <div class="tab" data-tab="analytics">Analytics</div>
   <div class="tab" data-tab="forwarders">Forwarders</div>
@@ -448,119 +493,25 @@ tr.selected { background: rgba(225,10,10,0.05); }
 </div>
 
 <main>
-  <div id="view-manual">
-    <div class="mp-hero">
-      <div class="left">
-        <div class="eyebrow">Monday · 09:00 · Cargo Yield Desk</div>
-        <h2>One RFQ. Five systems. Twenty-two minutes.</h2>
-        <div class="sub">A typical morning at the yield desk: a forwarder fires an RFQ into the inbox and gives the analyst 30 minutes to come back with a confirmed quote. Here's what answering <em>one</em> of them looks like today. Now multiply by 80 in the inbox.</div>
-      </div>
-      <div class="clock-card">
-        <div class="label">TIME PER RFQ</div>
-        <div class="time" id="mp-clock">22:14</div>
-        <div class="note">+ 79 still in inbox</div>
-      </div>
+  <div id="view-config">
+    <div class="cfg-header">
+      <h2>Choose your airline</h2>
+      <p>Pick a cargo carrier to reskin the demo with their branding, hubs, network, business-case numbers, and competitive positioning. The choice is saved in your browser — every viewer can configure independently.</p>
     </div>
 
-    <div class="mp-image-wrap">
-      <img src="/static/manual_process_hero.svg" alt="Cluttered desktop showing 5 legacy systems an analyst juggles to quote a single cargo RFQ" />
+    <div class="cfg-active" id="cfg-active-card">
+      <!-- Filled by JS -->
     </div>
 
-    <div class="mp-steps">
-      <div class="mp-step">
-        <div class="num">1</div>
-        <div class="body">
-          <h4>Look up the flight capacity</h4>
-          <span class="system">Cargo iQ · web portal · separate login</span>
-          <p>Find VS103 LHR-DEL on 28-May. Capacity 22,000 kg. Booked 17,160 kg. Trending to sellout.</p>
-          <div class="pain">⚠ Session times out every 15 min. Trend data lives in ORS — different system, different login.</div>
-        </div>
-        <div class="clk"><div class="delta">+ 2:30</div><div class="total">02:30</div></div>
-      </div>
+    <input type="text" class="cfg-search" id="cfg-search" placeholder="Search 30+ cargo carriers by name, IATA code, hub, or country…" oninput="filterAirlines(this.value)" />
 
-      <div class="mp-step">
-        <div class="num">2</div>
-        <div class="body">
-          <h4>Pull lane history</h4>
-          <span class="system">LaneRateCard_FY26.xlsx · OneDrive · 38s recalc</span>
-          <p>Pivot the workbook by lane × commodity × forwarder. Last 90 days. £3.21 avg on the lane. £3.08 for DSV specifically.</p>
-          <div class="pain">⚠ Last refreshed 4 days ago. Different analysts maintain different versions. No one trusts the numbers fully.</div>
-        </div>
-        <div class="clk"><div class="delta">+ 3:45</div><div class="total">06:15</div></div>
-      </div>
-
-      <div class="mp-step">
-        <div class="num">3</div>
-        <div class="body">
-          <h4>Check competitor pricing</h4>
-          <span class="system">competitor-rates-may-2026.pdf · emailed weekly</span>
-          <p>Ctrl-F through 28 pages for LHR-DEL PHC. IAG £3.35. Lufthansa £3.42. Emirates £3.28. We need to be competitive.</p>
-          <div class="pain">⚠ PDF is 14 days old. Real-time scrape exists but only commercial leadership sees it.</div>
-        </div>
-        <div class="clk"><div class="delta">+ 4:25</div><div class="total">10:40</div></div>
-      </div>
-
-      <div class="mp-step">
-        <div class="num">4</div>
-        <div class="body">
-          <h4>Confirm handling rules</h4>
-          <span class="system">Pharma_SOP_v7.docx · SharePoint · 42 pages</span>
-          <p>Verify DEL is CEIV Pharma certified. Confirm active container availability. Check the 60-minute tarmac SLA. Pull the right premium clause.</p>
-          <div class="pain">⚠ Different SOPs for AVI, DGR, perishables. New hires take 6 months to know which file to open.</div>
-        </div>
-        <div class="clk"><div class="delta">+ 4:15</div><div class="total">14:55</div></div>
-      </div>
-
-      <div class="mp-step">
-        <div class="num">5</div>
-        <div class="body">
-          <h4>Email manager for sign-off</h4>
-          <span class="system">Outlook · approval thread</span>
-          <p>"Suggest £3.18, slightly under IAG. Pharma premium applied. DSV is Platinum so 12% off card." Wait 4 minutes for a reply: "Try £3.30, push them on volume commitment."</p>
-          <div class="pain">⚠ Manager is in another timezone half the week. Junior analysts won't quote &gt; £3.00 unaided.</div>
-        </div>
-        <div class="clk"><div class="delta">+ 4:35</div><div class="total">19:30</div></div>
-      </div>
-
-      <div class="mp-step">
-        <div class="num">6</div>
-        <div class="body">
-          <h4>Reply to the forwarder</h4>
-          <span class="system">Outlook · type the quote · attach Ts &amp; Cs</span>
-          <p>Compose reply. Paste the rate. Attach the T&amp;Cs. Send.</p>
-          <div class="pain">⚠ Forwarder already accepted IAG 6 minutes ago. Lost booking. ~ £6,200 revenue gone.</div>
-        </div>
-        <div class="clk"><div class="delta">+ 2:44</div><div class="total">22:14</div></div>
-      </div>
+    <div class="airline-grid" id="airline-grid">
+      <!-- Filled by JS -->
     </div>
+  </div>
 
-    <div class="mp-multiplier">
-      <div>
-        <div class="h">Now multiply by 80 RFQs/day across 3 analysts.</div>
-        <p>That's ~88 person-hours/day on routine quoting alone. Premium / AOG / pharma bookings get the same 22 minutes as a £400 general-cargo job. ~20% of high-yield RFQs are quoted too slowly and lost to faster carriers.</p>
-      </div>
-      <div class="big">~£2.4M / yr</div>
-    </div>
-
-    <div class="mp-vs">
-      <div class="col before">
-        <div class="lbl">Today</div>
-        <div class="v">22 min</div>
-        <div class="d">analyst-driven · 5 systems · stale data · gut-feel premium</div>
-      </div>
-      <div class="col after">
-        <div class="lbl">With the Cargo Yield Agent</div>
-        <div class="v">1.4 sec</div>
-        <div class="d">capacity-aware · ML-predicted · auto-benchmarked · full audit trail · sent before the analyst opens Outlook</div>
-      </div>
-    </div>
-
-    <div style="text-align: center; margin-top: 18px;">
-      <a href="#" onclick="document.querySelector('[data-tab=inbox]').click(); return false;"
-         style="color: var(--va-red); font-weight: 600; text-decoration: none; font-size: 14px;">
-        See it in action — open the RFQ Inbox →
-      </a>
-    </div>
+  <div id="view-manual" style="display:none;">
+    <div id="manual-content"><!-- Rendered by renderManualTab() per airline --></div>
   </div>
 
   <div id="view-inbox" style="display:none;">
@@ -616,7 +567,7 @@ tr.selected { background: rgba(225,10,10,0.05); }
       <div class="genie-header">
         <div class="icon">G</div>
         <div>
-          <div class="title">Virgin Atlantic Cargo — Yield Analytics</div>
+          <div class="title" id="genie-title">Cargo — Yield Analytics</div>
           <div class="subtitle">AI/BI Genie space · 7 tables · gold + silver</div>
         </div>
         <button class="btn secondary new-conv" onclick="genieNew()">New conversation</button>
@@ -638,60 +589,13 @@ tr.selected { background: rgba(225,10,10,0.05); }
   </div>
 
   <div id="view-business" style="display:none;">
-    <div class="bc-hero" id="bc-hero">
-      <h1>£12M annual uplift on £236M cargo revenue</h1>
-      <p>Dynamic AWB pricing on the Databricks platform you already own. No new vendor. 12 weeks to production.</p>
-      <div class="stats">
-        <div class="stat"><div class="v counter" data-target="12" data-prefix="£" data-suffix="M">£0M</div><div class="l">Annual uplift</div></div>
-        <div class="stat"><div class="v counter" data-target="11" data-prefix="£" data-suffix="K">£0K</div><div class="l">Annual run cost</div></div>
-        <div class="stat"><div class="v counter" data-target="1090" data-suffix="×" data-decimals="0">0×</div><div class="l">ROI</div></div>
-        <div class="stat"><div class="v counter" data-target="8" data-suffix="h">0h</div><div class="l">Payback</div></div>
-      </div>
-    </div>
-
-    <div class="bc-grid">
-      <div class="bc-card">
-        <h3>The lever</h3>
-        <h2 style="margin-bottom: 16px;">3–7% yield uplift on every quote</h2>
-        <p style="font-size: 13px; color: var(--gray-700); line-height: 1.6; margin-bottom: 14px;">The agent reads capacity, runs the ML yield model, benchmarks competitors, and drafts a quote in 15 seconds. Sales approves; the quote fires.</p>
-        <div class="waterfall" id="bc-waterfall">
-          <div class="wf-row"><div class="lbl">Dynamic AWB pricing</div><div class="bar-track"><div class="bar-fill" data-width="80"></div></div><div class="amt">£12M</div></div>
-          <div class="wf-row"><div class="lbl">+1pp load factor</div><div class="bar-track"><div class="bar-fill" data-width="18"></div></div><div class="amt">£2.5M</div></div>
-          <div class="wf-row"><div class="lbl">Mix optimisation</div><div class="bar-track"><div class="bar-fill" data-width="55"></div></div><div class="amt">£8M</div></div>
-        </div>
-        <p style="font-size: 11px; color: var(--gray-500); margin-top: 14px;">Industry benchmarks: PROS, Revenue Technology Services, IATA dynamic pricing studies. Conservative blended estimate.</p>
-      </div>
-
-      <div class="bc-card">
-        <h3>The cost</h3>
-        <h2 style="margin-bottom: 14px;"><span class="counter" data-target="11" data-prefix="£" data-suffix="K">£0K</span> / year on Databricks</h2>
-        <div class="donut-wrap">
-          <svg class="donut" viewBox="0 0 42 42">
-            <circle cx="21" cy="21" r="15.91549430918954" fill="#fff" stroke="#F3F4F6" stroke-width="3"/>
-            <g id="donut-segments"></g>
-            <text x="21" y="20" text-anchor="middle" font-size="6" font-weight="700" fill="#0B2026">£11K</text>
-            <text x="21" y="25" text-anchor="middle" font-size="3" fill="#6B7280">per year</text>
-          </svg>
-          <div class="donut-legend" id="donut-legend"></div>
-        </div>
-        <p style="font-size: 11px; color: var(--gray-500); margin-top: 12px;">~500 RFQs/day, scale-to-zero on serving endpoints, list prices. Compares to <strong>£400K–£1.6M/year</strong> for PROS / RTS / Sabre licence alone.</p>
-      </div>
-    </div>
-
-    <div class="payback" style="margin-top: 0;">
-      <div class="icon-big">⏱️</div>
-      <div class="text">
-        <div class="h">First-shift break-even</div>
-        <div class="p">£11K annual run cost ÷ £33K/day uplift = system pays for itself by lunchtime on day one. Every quote after that is pure margin.</div>
-      </div>
-      <div class="number-big">8h</div>
-    </div>
+    <div id="business-content"><!-- Rendered by renderBusinessTab() per airline --></div>
   </div>
 
   <div id="view-about" style="display:none;">
     <div class="panel" style="padding: 24px;">
       <h2 style="font-size: 18px; margin-bottom: 8px;">Cargo Yield Agent — Demo Architecture</h2>
-      <p style="margin-bottom: 20px; color: var(--gray-700);">An end-to-end Databricks Data Intelligence Platform demo built for Virgin Atlantic Cargo. The agent dynamically prices inbound forwarder RFQs using a real ML yield model, capacity analysis, competitive intelligence, and IATA/VAA handling rules. Every component is a discoverable workspace asset.</p>
+      <p style="margin-bottom: 20px; color: var(--gray-700);" id="about-description">An end-to-end Databricks Data Intelligence Platform demo. The agent dynamically prices inbound forwarder RFQs using a real ML yield model, capacity analysis, competitive intelligence, and IATA / carrier-specific handling rules. Every component is a discoverable workspace asset.</p>
 
       <h3 style="font-size: 14px; margin: 18px 0 8px; color: var(--gray-700); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;">Workspace assets</h3>
       <table style="margin: 0 -20px;">
@@ -704,7 +608,7 @@ tr.selected { background: rgba(225,10,10,0.05); }
           <tr><td class="mono">cargo_yield_pipeline</td><td>Lakeflow Pipeline (DLT)</td><td>Pipelines — 7 tables, expectations, lineage</td></tr>
           <tr><td class="mono">cargo_yield_orchestration</td><td>Lakeflow Job</td><td>Jobs — DLT → QA → Vector Search sync</td></tr>
           <tr><td class="mono">cargo_ai.knowledge_base_index</td><td>Vector Search index</td><td>Vector Search — 15 docs (IATA, special cargo, lane briefs)</td></tr>
-          <tr><td>Virgin Atlantic Cargo Genie</td><td>AI/BI Genie space</td><td>Genie — 7 tables, natural-language analytics</td></tr>
+          <tr><td id="about-genie-row">Cargo Genie</td><td>AI/BI Genie space</td><td>Genie — 7 tables, natural-language analytics</td></tr>
           <tr><td class="mono">va-cargo-yield</td><td>Databricks App</td><td>This cockpit (FastAPI + React)</td></tr>
         </tbody>
       </table>
@@ -773,6 +677,427 @@ const fmt = {
 };
 
 let selectedRfqId = null;
+
+// =================================================================
+// Airline configuration — drives branding + content across the demo
+// =================================================================
+let _airlinesData = null;
+let _activeAirline = null;
+
+async function loadAirlines() {
+  const res = await fetch('/static/airlines.json');
+  _airlinesData = await res.json();
+  const saved = localStorage.getItem('airline_code');
+  const code = (saved && _airlinesData.airlines[saved]) ? saved : _airlinesData.default_airline;
+  _activeAirline = _airlinesData.airlines[code];
+}
+
+function setAirline(code) {
+  if (!_airlinesData.airlines[code]) return;
+  localStorage.setItem('airline_code', code);
+  _activeAirline = _airlinesData.airlines[code];
+  applyAirline();
+}
+
+// Format USD millions in the airline's local currency, abbreviated (M / B)
+function fmtMoneyUSDm(usd_m, a) {
+  const local_m = usd_m / a.usd_per_unit;
+  if (local_m >= 1000) return `${a.currency_symbol}${(local_m/1000).toFixed(1)}B`;
+  return `${a.currency_symbol}${Math.round(local_m).toLocaleString()}M`;
+}
+// Approximate per-kg quote in the airline's currency. Lane rates are tuned around a USD anchor and scaled.
+function fmtPerKg(usd_per_kg, a) {
+  const local = usd_per_kg / a.usd_per_unit;
+  return `${a.currency_symbol}${local.toFixed(2)}/kg`;
+}
+function fmtMoneyAbsolute(local_amount, a) {
+  if (local_amount >= 1e6) return `${a.currency_symbol}${(local_amount/1e6).toFixed(1)}M`;
+  if (local_amount >= 1e3) return `${a.currency_symbol}${(local_amount/1e3).toFixed(0)}K`;
+  return `${a.currency_symbol}${Math.round(local_amount).toLocaleString()}`;
+}
+
+function applyAirline() {
+  const a = _activeAirline;
+  // Theme colors (CSS vars used throughout)
+  document.documentElement.style.setProperty('--va-red', a.primary_color);
+  document.documentElement.style.setProperty('--va-purple', a.secondary_color);
+
+  // Header
+  $('header .logo').textContent = a.logo_mark;
+  $('header .logo').style.color = a.primary_color;
+  $('header h1').innerHTML = `${a.name} &mdash; Yield Agent Cockpit`;
+  document.title = `${a.short_name} Cargo Yield Agent`;
+
+  // Render the per-airline content blocks
+  renderConfigTab();
+  renderManualTab();
+  renderBusinessTab();
+  renderGenieAndAbout();
+}
+
+function renderGenieAndAbout() {
+  const a = _activeAirline;
+  const gt = $('#genie-title');
+  if (gt) gt.textContent = `${a.short_name} — Yield Analytics`;
+  const desc = $('#about-description');
+  if (desc) desc.textContent = `An end-to-end Databricks Data Intelligence Platform demo configured for ${a.name}. The agent dynamically prices inbound forwarder RFQs using a real ML yield model, capacity analysis, competitive intelligence, and IATA / carrier-specific handling rules. Every component is a discoverable workspace asset.`;
+  const gr = $('#about-genie-row');
+  if (gr) gr.textContent = `${a.short_name} Cargo Genie`;
+}
+
+function renderBusinessTab() {
+  const a = _activeAirline;
+  // Annual uplift = revenue * 4% blended uplift. Run cost is fixed in USD then localised.
+  const revLocalM = a.cargo_revenue_usd_m / a.usd_per_unit;
+  const upliftLocalM = Math.round(revLocalM * 0.04);
+  const dynamicLocalM = Math.round(revLocalM * 0.034);   // 3.4% from dynamic AWB pricing
+  const loadLocalM = Math.round(revLocalM * 0.011);      // 1.1% from +1pp load factor
+  const mixLocalM = Math.round(revLocalM * 0.023);       // 2.3% mix optimisation
+  const runCostUsd = 11000;
+  const runCostLocal = Math.round(runCostUsd / a.usd_per_unit);
+  const roi = Math.round((upliftLocalM * 1e6) / runCostLocal);
+  const dailyUpliftLocalK = Math.round((upliftLocalM * 1e6 / 365) / 1000);
+
+  const cur = a.currency_symbol;
+  // Competitor licence ranges in USD, localised
+  const compLowM = Math.round((400_000 / a.usd_per_unit) / 1000);   // 400K USD → local K
+  const compHighM = Math.round((1_600_000 / a.usd_per_unit) / 1000);
+
+  $('#business-content').innerHTML = `
+    <div class="bc-hero" id="bc-hero">
+      <h1>${cur}${upliftLocalM}M annual uplift on ${cur}${revLocalM >= 1000 ? (revLocalM/1000).toFixed(1)+'B' : Math.round(revLocalM)+'M'} cargo revenue</h1>
+      <p>Dynamic AWB pricing for ${a.short_name} on the Databricks platform you already own. No new vendor. 12 weeks to production.</p>
+      <div class="stats">
+        <div class="stat"><div class="v">${cur}${upliftLocalM}M</div><div class="l">Annual uplift</div></div>
+        <div class="stat"><div class="v">${cur}${(runCostLocal/1000).toFixed(0)}K</div><div class="l">Annual run cost</div></div>
+        <div class="stat"><div class="v">${roi.toLocaleString()}×</div><div class="l">ROI</div></div>
+        <div class="stat"><div class="v">8h</div><div class="l">Payback</div></div>
+      </div>
+    </div>
+
+    <div class="bc-grid">
+      <div class="bc-card">
+        <h3>The lever</h3>
+        <h2 style="margin-bottom: 16px;">3–7% yield uplift on every quote</h2>
+        <p style="font-size: 13px; color: var(--gray-700); line-height: 1.6; margin-bottom: 14px;">The agent reads capacity, runs the ML yield model, benchmarks competitors (${a.competitors.slice(0,2).join(', ')}), and drafts a quote in 15 seconds. Sales approves; the quote fires.</p>
+        <div class="waterfall">
+          <div class="wf-row"><div class="lbl">Dynamic AWB pricing</div><div class="bar-track"><div class="bar-fill" style="width:80%; background: ${a.primary_color};"></div></div><div class="amt">${cur}${dynamicLocalM}M</div></div>
+          <div class="wf-row"><div class="lbl">+1pp load factor</div><div class="bar-track"><div class="bar-fill" style="width:18%; background: ${a.primary_color};"></div></div><div class="amt">${cur}${loadLocalM}M</div></div>
+          <div class="wf-row"><div class="lbl">Mix optimisation</div><div class="bar-track"><div class="bar-fill" style="width:55%; background: ${a.primary_color};"></div></div><div class="amt">${cur}${mixLocalM}M</div></div>
+        </div>
+        <p style="font-size: 11px; color: var(--gray-500); margin-top: 14px;">Industry benchmarks: PROS, Revenue Technology Services, IATA dynamic pricing studies. Conservative blended estimate.</p>
+      </div>
+
+      <div class="bc-card">
+        <h3>The cost</h3>
+        <h2 style="margin-bottom: 14px;">${cur}${(runCostLocal/1000).toFixed(0)}K / year on Databricks</h2>
+        <div style="padding: 24px 0; text-align: center;">
+          <div style="font-size: 56px; font-weight: 800; color: ${a.primary_color}; font-variant-numeric: tabular-nums;">${cur}${(runCostLocal/1000).toFixed(0)}K</div>
+          <div style="font-size: 12px; color: var(--gray-500); margin-top: 4px;">per year (Databricks all-in)</div>
+        </div>
+        <p style="font-size: 11px; color: var(--gray-500); margin-top: 12px;">~500 RFQs/day, scale-to-zero on serving endpoints, list prices. Compares to <strong>${cur}${compLowM}K–${cur}${compHighM}K/year</strong> for PROS / RTS / Sabre licence alone.</p>
+      </div>
+    </div>
+
+    <div class="payback" style="margin-top: 0;">
+      <div class="icon-big">⏱️</div>
+      <div class="text">
+        <div class="h">First-shift break-even</div>
+        <div class="p">${cur}${(runCostLocal/1000).toFixed(0)}K annual run cost ÷ ${cur}${dailyUpliftLocalK}K/day uplift = system pays for itself by lunchtime on day one. Every quote after that is pure margin.</div>
+      </div>
+      <div class="number-big">8h</div>
+    </div>
+  `;
+}
+
+function renderConfigTab() {
+  const a = _activeAirline;
+  $('#cfg-active-card').innerHTML = `
+    <div class="lg">${a.logo_mark}</div>
+    <div class="meta">
+      <div class="lbl">ACTIVE AIRLINE</div>
+      <div class="nm">${a.name}</div>
+      <div class="sub">${a.hub_name} (${a.main_hub}) · ${a.country} · ${a.fleet_classes.join(' · ')}</div>
+    </div>
+    <div class="stats">
+      <div>Annual cargo revenue</div>
+      <div class="v">${fmtMoneyUSDm(a.cargo_revenue_usd_m, a)}</div>
+      <div style="margin-top:6px;">${a.cargo_tonnage_kt.toLocaleString()} kt tonnage</div>
+    </div>
+  `;
+
+  const items = Object.values(_airlinesData.airlines);
+  const html = items.map(x => `
+    <div class="airline-card ${x.code === a.code ? 'active' : ''}" data-q="${(x.name + ' ' + x.short_name + ' ' + x.code + ' ' + x.icao + ' ' + x.main_hub + ' ' + x.country).toLowerCase()}" onclick="setAirline('${x.code}')">
+      <div class="lg" style="background:${x.primary_color}">${x.logo_mark}</div>
+      <div>
+        <div class="name">${x.short_name}</div>
+        <div class="hub">${x.main_hub} · ${x.country}</div>
+        <div class="rev">${fmtMoneyUSDm(x.cargo_revenue_usd_m, x)} · ${x.cargo_tonnage_kt.toLocaleString()}kt</div>
+      </div>
+    </div>
+  `).join('');
+  $('#airline-grid').innerHTML = html;
+}
+
+function filterAirlines(q) {
+  const needle = q.trim().toLowerCase();
+  document.querySelectorAll('.airline-card').forEach(el => {
+    el.style.display = (!needle || el.dataset.q.includes(needle)) ? '' : 'none';
+  });
+}
+
+function renderManualTab() {
+  const a = _activeAirline;
+  // Pick a destination and a competitor pair to flavour the example
+  const lane = a.signature_lane;
+  const [origin, dest] = lane.split('-');
+  const flight = a.code + Math.floor(100 + Math.random() * 50);   // e.g. EK131
+  const comm = a.signature_commodity;
+  const top_comp = a.competitors[0];
+  const second_comp = a.competitors[1] || a.competitors[0];
+  // Anchor lane rate around USD 3.50/kg and let currency formatter localise
+  const baseRateUsd = 3.50;
+  const compRateUsd = 3.20;
+  const winnerRateUsd = 3.10;
+  const lostRevUsd = 6200;
+  const annualLossUsd = 2_400_000;
+
+  $('#manual-content').innerHTML = `
+    <div class="mp-hero">
+      <div class="left">
+        <div class="eyebrow">Monday · 09:00 · ${a.short_name} Cargo Yield Desk</div>
+        <h2>One RFQ. Five systems. Twenty-two minutes.</h2>
+        <div class="sub">A typical morning at the yield desk: a forwarder fires an RFQ into the inbox and gives the analyst 30 minutes to come back with a confirmed quote. Here's what answering <em>one</em> of them looks like today — for ${a.short_name} operating ${lane} ${comm.toLowerCase()}. Now multiply by 80 in the inbox.</div>
+      </div>
+      <div class="clock-card">
+        <div class="label">TIME PER RFQ</div>
+        <div class="time">22:14</div>
+        <div class="note">+ 79 still in inbox</div>
+      </div>
+    </div>
+
+    <div class="mp-image-wrap">
+      <div id="mp-hero-svg"></div>
+    </div>
+
+    <div class="mp-steps">
+      <div class="mp-step">
+        <div class="num">1</div>
+        <div class="body">
+          <h4>Look up the flight capacity</h4>
+          <span class="system">Cargo iQ · web portal · separate login</span>
+          <p>Find ${flight} ${lane} on 28-May. Capacity 22,000 kg. Booked 17,160 kg. Trending to sellout.</p>
+          <div class="pain">⚠ Session times out every 15 min. Trend data lives in ORS — different system, different login.</div>
+        </div>
+        <div class="clk"><div class="delta">+ 2:30</div><div class="total">02:30</div></div>
+      </div>
+
+      <div class="mp-step">
+        <div class="num">2</div>
+        <div class="body">
+          <h4>Pull lane history</h4>
+          <span class="system">LaneRateCard_FY26.xlsx · OneDrive · 38s recalc</span>
+          <p>Pivot the workbook by lane × commodity × forwarder. Last 90 days. ${fmtPerKg(baseRateUsd, a)} average on ${lane}.</p>
+          <div class="pain">⚠ Last refreshed 4 days ago. Different analysts maintain different versions. No one trusts the numbers fully.</div>
+        </div>
+        <div class="clk"><div class="delta">+ 3:45</div><div class="total">06:15</div></div>
+      </div>
+
+      <div class="mp-step">
+        <div class="num">3</div>
+        <div class="body">
+          <h4>Check competitor pricing</h4>
+          <span class="system">competitor-rates-may-2026.pdf · emailed weekly</span>
+          <p>Ctrl-F through 28 pages for ${lane} ${comm.slice(0,3).toUpperCase()}. ${top_comp} ${fmtPerKg(compRateUsd, a)}. ${second_comp} ${fmtPerKg(compRateUsd + 0.05, a)}. We need to be competitive.</p>
+          <div class="pain">⚠ PDF is 14 days old. Real-time scrape exists but only commercial leadership sees it.</div>
+        </div>
+        <div class="clk"><div class="delta">+ 4:25</div><div class="total">10:40</div></div>
+      </div>
+
+      <div class="mp-step">
+        <div class="num">4</div>
+        <div class="body">
+          <h4>Confirm handling rules</h4>
+          <span class="system">${comm}_SOP_v7.docx · SharePoint · 42 pages</span>
+          <p>Verify ${dest} is certified for ${comm.toLowerCase()}. Confirm container availability. Check the 60-minute tarmac SLA. Pull the right premium clause.</p>
+          <div class="pain">⚠ Different SOPs for live animals, dangerous goods, perishables. New hires take 6 months to know which file to open.</div>
+        </div>
+        <div class="clk"><div class="delta">+ 4:15</div><div class="total">14:55</div></div>
+      </div>
+
+      <div class="mp-step">
+        <div class="num">5</div>
+        <div class="body">
+          <h4>Email manager for sign-off</h4>
+          <span class="system">Outlook · approval thread</span>
+          <p>"Suggest ${fmtPerKg(baseRateUsd - 0.10, a)}, slightly under ${top_comp}. Premium applied. DSV is Platinum so 12% off card." Wait 4 minutes for a reply: "Try ${fmtPerKg(baseRateUsd, a)}, push them on volume commitment."</p>
+          <div class="pain">⚠ Manager is in another timezone half the week. Junior analysts won't quote &gt; ${fmtPerKg(3.00, a)} unaided.</div>
+        </div>
+        <div class="clk"><div class="delta">+ 4:35</div><div class="total">19:30</div></div>
+      </div>
+
+      <div class="mp-step">
+        <div class="num">6</div>
+        <div class="body">
+          <h4>Reply to the forwarder</h4>
+          <span class="system">Outlook · type the quote · attach Ts &amp; Cs</span>
+          <p>Compose reply. Paste the rate. Attach the T&amp;Cs. Send.</p>
+          <div class="pain">⚠ Forwarder already accepted ${top_comp} 6 minutes ago. Lost booking. ~ ${fmtMoneyAbsolute(lostRevUsd / a.usd_per_unit, a)} revenue gone.</div>
+        </div>
+        <div class="clk"><div class="delta">+ 2:44</div><div class="total">22:14</div></div>
+      </div>
+    </div>
+
+    <div class="mp-multiplier">
+      <div>
+        <div class="h">Now multiply by 80 RFQs/day across 3 analysts.</div>
+        <p>That's ~88 person-hours/day on routine quoting alone. Premium / AOG / ${comm.toLowerCase()} bookings get the same 22 minutes as a small general-cargo job. ~20% of high-yield RFQs are quoted too slowly and lost to faster carriers.</p>
+      </div>
+      <div class="big">~${fmtMoneyAbsolute(annualLossUsd / a.usd_per_unit, a)} / yr</div>
+    </div>
+
+    <div class="mp-vs">
+      <div class="col before">
+        <div class="lbl">Today</div>
+        <div class="v">22 min</div>
+        <div class="d">analyst-driven · 5 systems · stale data · gut-feel premium</div>
+      </div>
+      <div class="col after">
+        <div class="lbl">With the ${a.short_name} Cargo Yield Agent</div>
+        <div class="v">1.4 sec</div>
+        <div class="d">capacity-aware · ML-predicted · auto-benchmarked · full audit trail · sent before the analyst opens Outlook</div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 18px;">
+      <a href="#" onclick="document.querySelector('[data-tab=inbox]').click(); return false;"
+         style="color: var(--va-red); font-weight: 600; text-decoration: none; font-size: 14px;">
+        See it in action — open the RFQ Inbox →
+      </a>
+    </div>
+  `;
+
+  renderHeroSvg(a, lane, comm, top_comp, second_comp);
+}
+
+function renderHeroSvg(a, lane, comm, top_comp, second_comp) {
+  const [origin, dest] = lane.split('-');
+  const flight = a.code + Math.floor(100 + Math.random() * 50);
+  // USD-anchored rates rendered in airline currency
+  const r1 = fmtPerKg(3.35, a);
+  const r2 = fmtPerKg(3.42, a);
+  const r3 = fmtPerKg(3.28, a);
+  const ours = fmtPerKg(3.10, a);
+  const hist = fmtPerKg(3.21, a);
+  // Build the inline SVG (same composition as the standalone file, but live data)
+  $('#mp-hero-svg').innerHTML = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" style="width:100%;display:block;background:#0F1115" font-family="Inter, system-ui, sans-serif">
+  <defs>
+    <linearGradient id="winChrome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F5F5F7"/><stop offset="1" stop-color="#E4E4E8"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.35"/></filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#252830" stroke-width="0.5"/></pattern>
+  </defs>
+  <rect width="1200" height="640" fill="url(#grid)"/>
+  <text x="60" y="60" fill="#9AA0A6" font-size="13" letter-spacing="2">MONDAY · 09:00 · ${a.short_name.toUpperCase()} CARGO YIELD DESK</text>
+  <text x="60" y="100" fill="#FFFFFF" font-size="32" font-weight="700">One RFQ. Five systems. Twenty-two minutes.</text>
+  <text x="60" y="128" fill="#9AA0A6" font-size="15">A typical morning at the cargo yield desk. Now multiply by 80 RFQs in the inbox.</text>
+
+  <g transform="translate(60,170)" filter="url(#shadow)">
+    <g transform="translate(280,160) rotate(-2)">
+      <rect width="540" height="260" rx="8" fill="#FFFFFF"/>
+      <rect width="540" height="32" rx="8" fill="url(#winChrome)"/>
+      <circle cx="14" cy="16" r="5" fill="#FF5F57"/><circle cx="32" cy="16" r="5" fill="#FEBC2E"/><circle cx="50" cy="16" r="5" fill="#28C840"/>
+      <text x="270" y="20" text-anchor="middle" fill="#3C4043" font-size="12" font-weight="500">Outlook — Inbox(80)</text>
+      <text x="20" y="64" fill="#202124" font-size="13" font-weight="600">RE: RFQ ${lane} ${comm} 2,000kg</text>
+      <text x="20" y="86" fill="#5F6368" font-size="11">From: jane.choi@dsv.com · Required: confirmed quote by 09:30</text>
+      <line x1="20" y1="100" x2="520" y2="100" stroke="#E8EAED"/>
+      <text x="20" y="124" fill="#5F6368" font-size="11">Hi yield desk, please quote ${lane} 28-May ${flight}, 2000kg,</text>
+      <text x="20" y="142" fill="#5F6368" font-size="11">temp-controlled, CEIV req. Customer needs response within 30 min —</text>
+      <text x="20" y="160" fill="#5F6368" font-size="11">${top_comp} have already come back at ${r1}.</text>
+    </g>
+
+    <g transform="translate(170,100) rotate(-1)">
+      <rect width="540" height="260" rx="8" fill="#FFFFFF"/>
+      <rect width="540" height="32" rx="8" fill="url(#winChrome)"/>
+      <circle cx="14" cy="16" r="5" fill="#FF5F57"/><circle cx="32" cy="16" r="5" fill="#FEBC2E"/><circle cx="50" cy="16" r="5" fill="#28C840"/>
+      <text x="270" y="20" text-anchor="middle" fill="#3C4043" font-size="12" font-weight="500">${comm}_SOP_v7.docx — SharePoint</text>
+      <rect x="20" y="50" width="500" height="22" fill="#F1F3F4"/>
+      <text x="32" y="66" fill="#202124" font-size="12" font-weight="700">3.2 ${lane} ${comm.toLowerCase()} corridor — handling requirements</text>
+      <text x="20" y="92" fill="#3C4043" font-size="11">• CEIV certification required at both stations (${dest}: yes).</text>
+      <text x="20" y="110" fill="#3C4043" font-size="11">• Priority handling. Maximum tarmac exposure: 60 minutes.</text>
+      <text x="20" y="128" fill="#3C4043" font-size="11">• Active container required (Envirotainer / va-Q-tec).</text>
+      <text x="20" y="146" fill="#3C4043" font-size="11">• Premium 30–50% over GCR justified for handling integrity.</text>
+    </g>
+
+    <g transform="translate(60,40) rotate(1)">
+      <rect width="540" height="260" rx="8" fill="#FFFFFF"/>
+      <rect width="540" height="32" rx="8" fill="url(#winChrome)"/>
+      <circle cx="14" cy="16" r="5" fill="#FF5F57"/><circle cx="32" cy="16" r="5" fill="#FEBC2E"/><circle cx="50" cy="16" r="5" fill="#28C840"/>
+      <text x="270" y="20" text-anchor="middle" fill="#3C4043" font-size="12" font-weight="500">competitor-rates-may-2026.pdf · Adobe Acrobat</text>
+      <text x="20" y="60" fill="#202124" font-size="12" font-weight="700">May 2026 — Market Intel Scrape</text>
+      <text x="20" y="80" fill="#5F6368" font-size="10">Lane         Commodity   ${(a.competitors[0]||'').slice(0,6)}  ${(a.competitors[1]||'').slice(0,6)}  ${(a.competitors[2]||'').slice(0,6)}</text>
+      <line x1="20" y1="86" x2="520" y2="86" stroke="#E8EAED"/>
+      <text x="20" y="102" fill="#202124" font-size="10" font-family="DM Mono, monospace">${lane}      ${comm.slice(0,3).toUpperCase().padEnd(11,' ')}${r1}  ${r2}  ${r3}</text>
+      <text x="20" y="180" fill="#D93025" font-size="11" font-weight="600">Find on page: "${lane} ${comm.slice(0,3).toUpperCase()}" · 1 of 14 matches</text>
+    </g>
+
+    <g transform="translate(20,-10) rotate(-2)">
+      <rect width="540" height="280" rx="8" fill="#FFFFFF"/>
+      <rect width="540" height="32" rx="8" fill="url(#winChrome)"/>
+      <circle cx="14" cy="16" r="5" fill="#FF5F57"/><circle cx="32" cy="16" r="5" fill="#FEBC2E"/><circle cx="50" cy="16" r="5" fill="#28C840"/>
+      <text x="270" y="20" text-anchor="middle" fill="#3C4043" font-size="12" font-weight="500">LaneRateCard_FY26.xlsx — Excel · Pivot</text>
+      <rect x="20" y="44" width="500" height="20" fill="#107C41"/>
+      <text x="32" y="58" fill="#FFFFFF" font-size="11" font-weight="600">A1: Filter: lane = ${lane} · commodity = ${comm.slice(0,3).toUpperCase()}</text>
+      <g font-family="DM Mono, monospace" font-size="10" fill="#202124">
+        <text x="32" y="104">Forwarder              AWBs   Avg ${a.currency_symbol}/kg   90d Trend</text>
+        <text x="32" y="120">DSV Air &amp; Sea         147    ${hist.replace(a.currency_symbol,'').replace('/kg','')}        ↗ +2.1%</text>
+        <text x="32" y="136">Kuehne+Nagel           132    ${hist.replace(a.currency_symbol,'').replace('/kg','')}        ↗ +1.4%</text>
+        <text x="32" y="152">DHL Global             118    ${hist.replace(a.currency_symbol,'').replace('/kg','')}        ↘ -0.6%</text>
+      </g>
+      <text x="20" y="208" fill="#9AA0A6" font-size="10">⚠ Workbook last refreshed: 4 days ago</text>
+    </g>
+
+    <g transform="translate(-40,-60) rotate(2)">
+      <rect width="540" height="280" rx="8" fill="#FFFFFF"/>
+      <rect width="540" height="32" rx="8" fill="url(#winChrome)"/>
+      <circle cx="14" cy="16" r="5" fill="#FF5F57"/><circle cx="32" cy="16" r="5" fill="#FEBC2E"/><circle cx="50" cy="16" r="5" fill="#28C840"/>
+      <text x="270" y="20" text-anchor="middle" fill="#3C4043" font-size="12" font-weight="500">Cargo iQ — Flight &amp; Capacity Lookup</text>
+      <rect x="20" y="50" width="500" height="32" fill="${a.primary_color}" rx="3"/>
+      <text x="32" y="70" fill="#FFFFFF" font-size="12" font-weight="600">Flight: ${flight}   ·   Date: 28-May-2026   ·   Lane: ${origin} → ${dest}</text>
+      <text x="20" y="108" fill="#5F6368" font-size="11">Aircraft</text>
+      <text x="200" y="108" fill="#202124" font-size="12" font-weight="600">${a.fleet_classes[0]} · 22,000 kg cargo capacity</text>
+      <text x="20" y="132" fill="#5F6368" font-size="11">Booked load</text>
+      <text x="200" y="132" fill="#202124" font-size="12" font-weight="600">17,160 kg (78%)</text>
+      <text x="20" y="156" fill="#5F6368" font-size="11">Available</text>
+      <text x="200" y="156" fill="#202124" font-size="12" font-weight="600">4,840 kg · sellout trend: high</text>
+      <rect x="20" y="180" width="500" height="14" fill="#E8EAED" rx="7"/>
+      <rect x="20" y="180" width="390" height="14" fill="${a.primary_color}" rx="7"/>
+      <text x="20" y="216" fill="#D93025" font-size="11" font-weight="600">⚠ Session about to time out (Cargo iQ sessions expire every 15 min)</text>
+    </g>
+  </g>
+
+  <g transform="translate(900,200)">
+    <rect width="240" height="280" rx="14" fill="#22252D" stroke="#3A3E48"/>
+    <text x="120" y="34" text-anchor="middle" fill="#9AA0A6" font-size="11" letter-spacing="2">TIME ON THIS RFQ</text>
+    <text x="120" y="100" text-anchor="middle" fill="#FFFFFF" font-size="56" font-weight="800" font-family="DM Mono, monospace">22:14</text>
+    <text x="120" y="124" text-anchor="middle" fill="${a.primary_color}" font-size="12" font-weight="600">+ 79 RFQs still in inbox</text>
+    <line x1="20" y1="148" x2="220" y2="148" stroke="#3A3E48"/>
+    <text x="20" y="172" fill="#9AA0A6" font-size="10">Systems opened</text><text x="220" y="172" text-anchor="end" fill="#FFFFFF" font-size="13" font-weight="700">5</text>
+    <text x="20" y="196" fill="#9AA0A6" font-size="10">Manager approvals waiting</text><text x="220" y="196" text-anchor="end" fill="#FFFFFF" font-size="13" font-weight="700">2</text>
+    <text x="20" y="220" fill="#9AA0A6" font-size="10">Forwarder timeout in</text><text x="220" y="220" text-anchor="end" fill="#FEBC2E" font-size="13" font-weight="700">7:46</text>
+    <text x="20" y="244" fill="#9AA0A6" font-size="10">${top_comp} offered</text><text x="220" y="244" text-anchor="end" fill="#FFFFFF" font-size="13" font-weight="700">${r1}</text>
+    <text x="20" y="268" fill="#9AA0A6" font-size="10">Best guess so far</text><text x="220" y="268" text-anchor="end" fill="#9AA0A6" font-size="13" font-weight="500">??</text>
+  </g>
+
+  <g transform="translate(60,540)">
+    <rect width="1080" height="74" rx="10" fill="#0F2D1A" stroke="#1F5A33"/>
+    <text x="24" y="32" fill="#5DC081" font-size="11" letter-spacing="2">WITH THE ${a.short_name.toUpperCase()} CARGO YIELD AGENT</text>
+    <text x="24" y="60" fill="#FFFFFF" font-size="22" font-weight="700">1.4 seconds.  Quote rationale.  Capacity-aware.  Already in the inbox.</text>
+    <text x="1056" y="46" text-anchor="end" fill="#5DC081" font-size="38" font-weight="800" font-family="DM Mono, monospace">−99.9%</text>
+  </g>
+</svg>`;
+}
 
 async function api(path, opts) {
   const r = await fetch(path, opts);
@@ -1287,13 +1612,21 @@ $$('.tab').forEach(t => {
     if (tab === 'analytics') loadAnalytics();
     if (tab === 'forwarders') loadForwarders();
     if (tab === 'genie') loadGenieChips();
-    if (tab === 'business') animateBusinessCase();
+    // Business and Manual Process tabs render reactively from the active airline profile
   });
 });
 
-// Initial load
-loadKPIs();
-loadRFQs();
+// Initial load — airline first so applyAirline() rewrites branding/copy before backend fetches resolve
+(async () => {
+  try {
+    await loadAirlines();
+    applyAirline();
+  } catch (e) {
+    console.error('Failed to load airlines.json', e);
+  }
+  loadKPIs();
+  loadRFQs();
+})();
 </script>
 </body>
 </html>
