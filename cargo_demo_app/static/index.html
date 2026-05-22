@@ -432,43 +432,82 @@ tr.selected { background: rgba(225,10,10,0.05); }
 .cfg-header p { color: var(--gray-500); font-size: 13px; max-width: 620px; }
 .cfg-active {
   background: linear-gradient(135deg, var(--va-red) 0%, var(--va-purple) 100%);
-  color: #fff; border-radius: 10px; padding: 18px 22px; margin-bottom: 18px;
-  display: grid; grid-template-columns: 64px 1fr auto; gap: 16px; align-items: center;
+  color: #fff; border-radius: 14px; padding: 28px 32px; margin-bottom: 18px;
+  display: grid; grid-template-columns: 88px 1fr auto; gap: 22px; align-items: center;
+  position: relative;
 }
 .cfg-active .lg {
-  width: 56px; height: 56px; border-radius: 8px; background: rgba(255,255,255,0.18);
-  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 22px;
+  width: 80px; height: 80px; border-radius: 12px; background: rgba(255,255,255,0.18);
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 32px;
 }
 .cfg-active .meta .lbl { font-size: 10px; letter-spacing: 2px; opacity: 0.85; }
-.cfg-active .meta .nm { font-size: 22px; font-weight: 700; margin-top: 2px; }
-.cfg-active .meta .sub { font-size: 12px; opacity: 0.92; margin-top: 4px; }
-.cfg-active .stats { text-align: right; font-size: 12px; opacity: 0.95; }
-.cfg-active .stats .v { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cfg-active .meta .nm { font-size: 28px; font-weight: 700; margin-top: 4px; line-height: 1.1; }
+.cfg-active .meta .sub { font-size: 13px; opacity: 0.92; margin-top: 8px; }
+.cfg-active .meta .tags {
+  display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;
+}
+.cfg-active .meta .tag {
+  background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 4px;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.02em;
+}
+.cfg-active .stats { text-align: right; font-size: 13px; opacity: 0.95; }
+.cfg-active .stats .v { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.cfg-active .stats .vsub { font-size: 11px; opacity: 0.85; margin-top: 4px; }
+.cfg-active .stats .v2 { font-size: 16px; font-weight: 700; margin-top: 10px; font-variant-numeric: tabular-nums; }
+
+.cfg-switch-btn {
+  background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.35);
+  padding: 6px 14px; border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: background 0.15s ease;
+  position: absolute; top: 14px; right: 16px;
+}
+.cfg-switch-btn:hover { background: rgba(255,255,255,0.28); }
+
+.cfg-picker {
+  background: white; border: 1px solid var(--gray-200); border-radius: 10px;
+  padding: 18px 20px; margin-bottom: 18px;
+}
+.cfg-picker.hidden { display: none; }
+.cfg-picker .picker-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.cfg-picker .picker-head h3 { font-size: 14px; font-weight: 700; }
+.cfg-picker .picker-head .close {
+  background: transparent; border: none; color: var(--gray-500); cursor: pointer; font-size: 18px; line-height: 1;
+  padding: 4px 8px; border-radius: 4px;
+}
+.cfg-picker .picker-head .close:hover { background: var(--gray-100); color: var(--ink); }
+
+.cfg-search {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--gray-200); border-radius: 8px;
+  font-size: 14px; font-family: inherit; margin-bottom: 12px;
+}
+.cfg-search:focus { outline: 2px solid var(--va-red); outline-offset: -1px; border-color: transparent; }
+
+.airline-results {
+  max-height: 420px; overflow-y: auto; border-top: 1px solid var(--gray-100);
+}
+.airline-results .empty {
+  padding: 32px 12px; text-align: center; color: var(--gray-500); font-size: 13px;
+}
+.airline-row {
+  display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center;
+  padding: 10px 8px; border-radius: 6px; cursor: pointer; transition: background 0.1s ease;
+}
+.airline-row:hover { background: var(--gray-100); }
+.airline-row.active { background: rgba(225,10,10,0.06); }
+.airline-row .lg {
+  width: 38px; height: 38px; border-radius: 6px; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; letter-spacing: -0.02em;
+}
+.airline-row .name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.airline-row .sub { font-size: 11px; color: var(--gray-500); font-family: 'DM Mono', monospace; }
+.airline-row .rev { font-size: 11.5px; color: var(--gray-700); font-variant-numeric: tabular-nums; text-align: right; }
 
 .cfg-search {
   width: 100%; padding: 10px 14px; border: 1px solid var(--gray-200); border-radius: 8px;
   font-size: 14px; font-family: inherit; margin-bottom: 16px;
 }
 .cfg-search:focus { outline: 2px solid var(--va-red); outline-offset: -1px; border-color: transparent; }
-
-.airline-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px;
-}
-.airline-card {
-  display: grid; grid-template-columns: 52px 1fr; gap: 12px;
-  background: white; border: 1.5px solid var(--gray-200); border-radius: 10px;
-  padding: 14px; cursor: pointer; transition: all 0.12s ease;
-}
-.airline-card:hover { border-color: var(--gray-300); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-.airline-card.active { border-color: var(--va-red); box-shadow: 0 0 0 2px rgba(225,10,10,0.15); }
-.airline-card .lg {
-  width: 52px; height: 52px; border-radius: 8px; color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800; font-size: 18px; letter-spacing: -0.02em;
-}
-.airline-card .name { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 2px; line-height: 1.25; }
-.airline-card .hub { font-size: 11px; color: var(--gray-500); font-family: 'DM Mono', monospace; margin-bottom: 4px; }
-.airline-card .rev { font-size: 11.5px; color: var(--gray-700); font-variant-numeric: tabular-nums; }
 
 </style>
 </head>
@@ -494,19 +533,19 @@ tr.selected { background: rgba(225,10,10,0.05); }
 
 <main>
   <div id="view-config">
-    <div class="cfg-header">
-      <h2>Choose your airline</h2>
-      <p>Pick a cargo carrier to reskin the demo with their branding, hubs, network, business-case numbers, and competitive positioning. The choice is saved in your browser — every viewer can configure independently.</p>
-    </div>
-
     <div class="cfg-active" id="cfg-active-card">
-      <!-- Filled by JS -->
+      <!-- Filled by JS — active airline shown prominently; switch button reveals the picker below -->
     </div>
 
-    <input type="text" class="cfg-search" id="cfg-search" placeholder="Search 30+ cargo carriers by name, IATA code, hub, or country…" oninput="filterAirlines(this.value)" />
-
-    <div class="airline-grid" id="airline-grid">
-      <!-- Filled by JS -->
+    <div class="cfg-picker hidden" id="cfg-picker">
+      <div class="picker-head">
+        <h3>Switch airline</h3>
+        <button class="close" onclick="togglePicker(false)" aria-label="Close picker">×</button>
+      </div>
+      <input type="text" class="cfg-search" id="cfg-search" placeholder="Type a name, IATA code, hub, or country…" oninput="filterAirlines(this.value)" autocomplete="off" />
+      <div class="airline-results" id="airline-results">
+        <div class="empty">Start typing to find a carrier.</div>
+      </div>
     </div>
   </div>
 
@@ -812,39 +851,77 @@ function renderBusinessTab() {
 
 function renderConfigTab() {
   const a = _activeAirline;
+  // Build the prominent active-airline hero card. This is the ONLY airline visible
+  // by default — other carriers stay hidden behind the picker so a customer never
+  // sees a list of their competitors during a demo.
+  const tags = [
+    `Hub: ${a.main_hub}`,
+    a.country,
+    `Signature: ${a.signature_commodity}`,
+    `Network: ${a.top_lanes.slice(0, 3).join(' · ')}`,
+  ].map(t => `<span class="tag">${t}</span>`).join('');
+
   $('#cfg-active-card').innerHTML = `
+    <button class="cfg-switch-btn" onclick="togglePicker(true)">⚙ Switch airline</button>
     <div class="lg">${a.logo_mark}</div>
     <div class="meta">
-      <div class="lbl">ACTIVE AIRLINE</div>
+      <div class="lbl">CONFIGURED FOR</div>
       <div class="nm">${a.name}</div>
-      <div class="sub">${a.hub_name} (${a.main_hub}) · ${a.country} · ${a.fleet_classes.join(' · ')}</div>
+      <div class="sub">${a.hub_name} · Fleet: ${a.fleet_classes.join(' · ')}</div>
+      <div class="tags">${tags}</div>
     </div>
     <div class="stats">
-      <div>Annual cargo revenue</div>
+      <div class="vsub">Annual cargo revenue</div>
       <div class="v">${fmtMoneyUSDm(a.cargo_revenue_usd_m, a)}</div>
-      <div style="margin-top:6px;">${a.cargo_tonnage_kt.toLocaleString()} kt tonnage</div>
+      <div class="vsub" style="margin-top: 10px;">Annual tonnage</div>
+      <div class="v2">${a.cargo_tonnage_kt.toLocaleString()} kt</div>
     </div>
   `;
+  // Re-render the picker contents if it's currently open
+  if (!$('#cfg-picker').classList.contains('hidden')) {
+    filterAirlines($('#cfg-search').value || '');
+  }
+}
 
-  const items = Object.values(_airlinesData.airlines);
-  const html = items.map(x => `
-    <div class="airline-card ${x.code === a.code ? 'active' : ''}" data-q="${(x.name + ' ' + x.short_name + ' ' + x.code + ' ' + x.icao + ' ' + x.main_hub + ' ' + x.country).toLowerCase()}" onclick="setAirline('${x.code}')">
-      <div class="lg" style="background:${x.primary_color}">${x.logo_mark}</div>
-      <div>
-        <div class="name">${x.short_name}</div>
-        <div class="hub">${x.main_hub} · ${x.country}</div>
-        <div class="rev">${fmtMoneyUSDm(x.cargo_revenue_usd_m, x)} · ${x.cargo_tonnage_kt.toLocaleString()}kt</div>
-      </div>
-    </div>
-  `).join('');
-  $('#airline-grid').innerHTML = html;
+function togglePicker(show) {
+  const picker = $('#cfg-picker');
+  if (show) {
+    picker.classList.remove('hidden');
+    const s = $('#cfg-search');
+    s.value = '';
+    filterAirlines('');
+    setTimeout(() => s.focus(), 30);
+  } else {
+    picker.classList.add('hidden');
+  }
 }
 
 function filterAirlines(q) {
   const needle = q.trim().toLowerCase();
-  document.querySelectorAll('.airline-card').forEach(el => {
-    el.style.display = (!needle || el.dataset.q.includes(needle)) ? '' : 'none';
+  const results = $('#airline-results');
+  if (!needle) {
+    results.innerHTML = '<div class="empty">Start typing to find a carrier.</div>';
+    return;
+  }
+  const active = _activeAirline.code;
+  const matches = Object.values(_airlinesData.airlines).filter(x => {
+    const blob = (x.name + ' ' + x.short_name + ' ' + x.code + ' ' + x.icao + ' ' + x.main_hub + ' ' + x.country).toLowerCase();
+    return blob.includes(needle);
   });
+  if (matches.length === 0) {
+    results.innerHTML = '<div class="empty">No carriers match. Try IATA code (BA), hub (FRA), or country.</div>';
+    return;
+  }
+  results.innerHTML = matches.map(x => `
+    <div class="airline-row ${x.code === active ? 'active' : ''}" onclick="setAirline('${x.code}'); togglePicker(false);">
+      <div class="lg" style="background:${x.primary_color}">${x.logo_mark}</div>
+      <div>
+        <div class="name">${x.short_name}</div>
+        <div class="sub">${x.code} · ${x.main_hub} · ${x.country}</div>
+      </div>
+      <div class="rev">${fmtMoneyUSDm(x.cargo_revenue_usd_m, x)}</div>
+    </div>
+  `).join('');
 }
 
 function renderManualTab() {
