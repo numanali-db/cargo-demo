@@ -53,7 +53,7 @@ export GENIE_SPACE_ID APP_SP_ID
 
 # Variables envsubst should substitute. Listing them explicitly prevents accidental
 # substitution of unrelated $VAR-looking text in SQL or YAML.
-SUBST_VARS='${CATALOG} ${WAREHOUSE_ID} ${VS_ENDPOINT} ${LLM_ENDPOINT} ${YIELD_MODEL_ENDPOINT} ${AGENT_ENDPOINT} ${APP_NAME} ${GENIE_SPACE_ID} ${APP_SP_ID}'
+SUBST_VARS='${CATALOG} ${WAREHOUSE_ID} ${VS_ENDPOINT} ${LLM_ENDPOINT} ${YIELD_MODEL_ENDPOINT} ${AGENT_ENDPOINT} ${APP_NAME} ${GENIE_SPACE_ID} ${APP_SP_ID} ${PGHOST} ${PGDATABASE} ${LAKEBASE_ENDPOINT}'
 
 # --- Render SQL ---
 mkdir -p build/sql

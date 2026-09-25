@@ -54,6 +54,7 @@ customer where pricing, capacity, or quoting is on the table.
 - **ML model** — yield prediction (sklearn → MLflow → Model Serving)
 - **Knowledge base** — IATA handling rules indexed in Vector Search
 - **Agent** — MLflow PyFunc deployed to Model Serving, calling SQL, ML, VS, and an LLM
+- **Lakebase (Postgres) backend** — the operational RFQ inbox + submitted quotes live in a real Lakebase Autoscaling database (OLTP); analytics stay in the lakehouse (OLAP)
 - **Databricks App** — FastAPI + static UI showing RFQ inbox, agent quotes, and Genie chat
 
 ## Prerequisites
@@ -215,6 +216,54 @@ databricks sql query --warehouse-id "$WAREHOUSE_ID" --file build/sql/05_grant_ap
 ```
 
 Restart the app and open its URL from `databricks apps list`.
+
+### 10. Provision the Lakebase (Postgres) backend
+
+The operational RFQ inbox and submitted quotes live in a real **Lakebase Autoscaling**
+Postgres database — not in Delta. The app reads open RFQs and writes approved quotes
+directly against Postgres, minting a short-lived OAuth token via its own service principal.
+Analytics (silver/gold, Genie) stay on the SQL warehouse.
+
+```bash
+PROFILE=<your-profile>
+SP=$(databricks apps get "$APP_NAME" -p $PROFILE -o json | jq -r '.service_principal_client_id')
+
+# 1. Create the Autoscaling project (production branch + primary endpoint, scale-to-zero)
+databricks postgres create-project cargo-yield \
+  --json '{"spec": {"display_name": "Cargo Yield Agent"}}' -p $PROFILE
+
+# 2. Create the managed `cargo` database (owner = your user role)
+databricks postgres create-database projects/cargo-yield/branches/production \
+  --database-id cargo \
+  --json '{"spec": {"postgres_database": "cargo", "role": "projects/cargo-yield/branches/production/roles/<your-user-role>"}}' -p $PROFILE
+
+# 3. Create a Postgres role bound to the app service principal (OAuth)
+databricks postgres create-role projects/cargo-yield/branches/production \
+  --role-id "$SP" \
+  --json "{\"spec\": {\"identity_type\": \"SERVICE_PRINCIPAL\", \"postgres_role\": \"$SP\", \"auth_method\": \"LAKEBASE_OAUTH_V1\"}}" -p $PROFILE
+
+# 4. Create tables, grant the app SP least-privilege access, and seed rfq_inbox +
+#    commodities from the existing UC bronze tables (quotes starts empty).
+PROFILE=$PROFILE APP_SP_ID=$SP python scripts/provision_lakebase.py
+```
+
+Then set the Lakebase env vars in `.env` (`PGHOST`, `PGDATABASE=cargo`, `LAKEBASE_ENDPOINT`),
+re-run `scripts/render.sh`, and redeploy the app (step 8). Get `PGHOST` from:
+
+```bash
+databricks postgres list-endpoints projects/cargo-yield/branches/production \
+  -p $PROFILE -o json | jq -r '.[0].status.hosts.host'
+```
+
+**Optional — surface the operational tables in Unity Catalog** (for Genie / SQL read-back):
+
+```bash
+databricks postgres create-catalog cargo_ops \
+  --json '{"spec": {"postgres_database": "cargo", "branch": "projects/cargo-yield/branches/production"}}' -p $PROFILE
+```
+
+This requires `CREATE CATALOG` on the metastore. The app works fully without it — this
+only makes the live RFQs/quotes queryable from Databricks SQL and Genie.
 
 ## Repo layout
 

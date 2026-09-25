@@ -7,6 +7,10 @@ CREATE SCHEMA IF NOT EXISTS ${CATALOG}.cargo_bronze COMMENT 'Cargo demo - raw da
 CREATE SCHEMA IF NOT EXISTS ${CATALOG}.cargo_silver COMMENT 'Cleaned and enriched cargo data';
 CREATE SCHEMA IF NOT EXISTS ${CATALOG}.cargo_gold COMMENT 'Business-ready cargo analytics';
 CREATE SCHEMA IF NOT EXISTS ${CATALOG}.cargo_ai COMMENT 'AI artifacts: models, vector indexes, agents';
-CREATE SCHEMA IF NOT EXISTS ${CATALOG}.cargo_ops COMMENT 'Operational tables synced from Lakebase';
+-- Operational (OLTP) tables — the RFQ inbox and submitted quotes — live in a real
+-- Lakebase (Postgres) database, provisioned by scripts/provision_lakebase.py.
+-- To surface them in UC for Genie/SQL, register the Lakebase DB as a catalog
+-- (`databricks postgres create-catalog`) — requires CREATE CATALOG on the metastore.
+CREATE SCHEMA IF NOT EXISTS ${CATALOG}.cargo_ops COMMENT 'Operational RFQ/quote tables — backed by Lakebase Postgres (see scripts/provision_lakebase.py)';
 
 SELECT 'Catalog ${CATALOG} created with schemas: cargo_bronze, cargo_silver, cargo_gold, cargo_ai, cargo_ops' AS status;

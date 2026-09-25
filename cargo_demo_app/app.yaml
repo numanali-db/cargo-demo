@@ -15,3 +15,10 @@ env:
     value: "${GENIE_SPACE_ID}"
   - name: AGENT_ENDPOINT
     value: "${AGENT_ENDPOINT}"
+  # Lakebase (Postgres) — operational RFQ inbox + quotes
+  - name: PGHOST
+    value: "${PGHOST}"
+  - name: PGDATABASE
+    value: "${PGDATABASE}"
+  - name: LAKEBASE_ENDPOINT
+    value: "${LAKEBASE_ENDPOINT}"

@@ -3,3 +3,4 @@ uvicorn[standard]==0.32.0
 databricks-sdk==0.40.0
 databricks-vectorsearch==0.40
 pydantic==2.9.0
+psycopg2-binary==2.9.9

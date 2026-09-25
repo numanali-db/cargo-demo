@@ -24,9 +24,16 @@ from pydantic import BaseModel
 from databricks.sdk import WorkspaceClient
 
 from .db import query, CATALOG
+from . import pg
 
 GENIE_SPACE_ID = os.environ.get("GENIE_SPACE_ID", "")
 AGENT_ENDPOINT = os.environ["AGENT_ENDPOINT"]
+
+# The synthetic dataset is static, so CURRENT_DATE()-relative windows go empty as
+# real time moves past the last generated flight_date. Anchor all time-relative
+# analytics to the latest flight_date in the data so KPIs populate whenever the
+# demo is shown ("last 30 days" => last 30 days of available data).
+DATA_TODAY = f"(SELECT MAX(flight_date) FROM {CATALOG}.cargo_silver.awb_enriched)"
 
 app = FastAPI(title="Virgin Atlantic Cargo Yield Agent")
 
@@ -38,32 +45,33 @@ def health():
 
 @app.get("/api/rfqs")
 def list_rfqs(status: str = "pending_quote", limit: int = 50):
-    rows = query(f"""
+    # Operational inbox — served live from Lakebase (Postgres).
+    rows = pg.query("""
       SELECT r.rfq_id, r.received_at, r.flight_id, r.flight_date,
              r.origin_iata, r.destination_iata,
-             CONCAT(r.origin_iata,'-',r.destination_iata) AS lane,
+             r.origin_iata || '-' || r.destination_iata AS lane,
              r.forwarder_name, r.commodity_code, c.commodity_name,
              c.handling_tier,
              r.requested_weight_kg, r.requested_pieces,
              r.ready_date, r.special_handling, r.temp_controlled,
              r.status, r.notes
-      FROM {CATALOG}.cargo_bronze.rfq_inbox r
-      LEFT JOIN {CATALOG}.cargo_bronze.commodities c ON r.commodity_code = c.commodity_code
-      WHERE r.status = '{status}'
+      FROM rfq_inbox r
+      LEFT JOIN commodities c ON r.commodity_code = c.commodity_code
+      WHERE r.status = %s
       ORDER BY r.received_at DESC
-      LIMIT {limit}
-    """)
+      LIMIT %s
+    """, (status, limit))
     return {"count": len(rows), "rfqs": rows}
 
 
 @app.get("/api/rfq/{rfq_id}")
 def get_rfq(rfq_id: str):
-    rows = query(f"""
+    rows = pg.query("""
       SELECT r.*, c.commodity_name, c.handling_tier
-      FROM {CATALOG}.cargo_bronze.rfq_inbox r
-      LEFT JOIN {CATALOG}.cargo_bronze.commodities c ON r.commodity_code = c.commodity_code
-      WHERE r.rfq_id = '{rfq_id}'
-    """)
+      FROM rfq_inbox r
+      LEFT JOIN commodities c ON r.commodity_code = c.commodity_code
+      WHERE r.rfq_id = %s
+    """, (rfq_id,))
     if not rows:
         raise HTTPException(404, f"RFQ {rfq_id} not found")
     return rows[0]
@@ -72,9 +80,7 @@ def get_rfq(rfq_id: str):
 @app.post("/api/rfq/{rfq_id}/analyze")
 def analyze_rfq(rfq_id: str):
     """Invoke the deployed cargo-yield-agent serving endpoint."""
-    rows = query(f"""
-      SELECT * FROM {CATALOG}.cargo_bronze.rfq_inbox WHERE rfq_id = '{rfq_id}'
-    """)
+    rows = pg.query("SELECT * FROM rfq_inbox WHERE rfq_id = %s", (rfq_id,))
     if not rows:
         raise HTTPException(404, f"RFQ {rfq_id} not found")
     rfq = rows[0]
@@ -107,18 +113,18 @@ def analytics_summary():
         SELECT SUM(revenue_gbp) AS rev, SUM(chargeable_weight_kg) AS kg,
                COUNT(*) AS awbs, AVG(rate_gbp_per_kg) AS avg_yield
         FROM {CATALOG}.cargo_silver.awb_enriched
-        WHERE flight_date >= DATE_ADD(CURRENT_DATE(), -30)
+        WHERE flight_date >= DATE_ADD({DATA_TODAY}, -30)
       ),
       prior_30 AS (
         SELECT SUM(revenue_gbp) AS rev, SUM(chargeable_weight_kg) AS kg
         FROM {CATALOG}.cargo_silver.awb_enriched
-        WHERE flight_date >= DATE_ADD(CURRENT_DATE(), -60)
-          AND flight_date <  DATE_ADD(CURRENT_DATE(), -30)
+        WHERE flight_date >= DATE_ADD({DATA_TODAY}, -60)
+          AND flight_date <  DATE_ADD({DATA_TODAY}, -30)
       ),
       lf AS (
         SELECT AVG(load_factor) AS avg_lf
         FROM {CATALOG}.cargo_silver.flight_utilization
-        WHERE flight_date >= DATE_ADD(CURRENT_DATE(), -30)
+        WHERE flight_date >= DATE_ADD({DATA_TODAY}, -30)
       )
       SELECT
         l.rev   AS rev_30d,
@@ -141,7 +147,7 @@ def analytics_lanes():
              SUM(revenue_gbp)    AS revenue_gbp,
              AVG(avg_yield_gbp_per_kg) AS avg_yield
       FROM {CATALOG}.cargo_gold.lane_monthly_summary
-      WHERE month >= DATE_ADD(CURRENT_DATE(), -180)
+      WHERE month >= DATE_ADD({DATA_TODAY}, -180)
       GROUP BY ALL
       ORDER BY revenue_gbp DESC
       LIMIT 20
@@ -169,7 +175,7 @@ def analytics_monthly():
              SUM(chargeable_weight_kg)/1000.0 AS tonnage,
              AVG(rate_gbp_per_kg) AS avg_yield
       FROM {CATALOG}.cargo_silver.awb_enriched
-      WHERE flight_date >= DATE_ADD(CURRENT_DATE(), -365)
+      WHERE flight_date >= DATE_ADD({DATA_TODAY}, -365)
       GROUP BY ALL
       ORDER BY month
     """)
@@ -186,15 +192,29 @@ class QuoteSubmission(BaseModel):
 
 @app.post("/api/quote/submit")
 def submit_quote(q: QuoteSubmission):
-    # In a real app this would write to Lakebase / Salesforce. For demo: log and return.
+    # Persist the approved quote to Lakebase (Postgres) and mark the RFQ quoted.
+    quote_id = f"Q-{q.rfq_id}-{int(time.time())}"
+    revenue = round(q.rate_gbp_per_kg * q.weight_kg, 2)
+    row = pg.execute(
+        """
+        INSERT INTO quotes (quote_id, rfq_id, rate_gbp_per_kg, weight_kg,
+                            revenue_gbp, submitted_by, notes, status)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, 'fired_to_forwarder')
+        RETURNING quote_id, revenue_gbp, status, created_at
+        """,
+        (quote_id, q.rfq_id, q.rate_gbp_per_kg, q.weight_kg, revenue, q.user_email, q.notes),
+        returning=True,
+    )
+    pg.execute("UPDATE rfq_inbox SET status = 'quoted' WHERE rfq_id = %s", (q.rfq_id,))
     return {
-        "quote_id": f"Q-{q.rfq_id}",
+        "quote_id": row["quote_id"],
         "rfq_id": q.rfq_id,
         "rate_gbp_per_kg": q.rate_gbp_per_kg,
-        "revenue_gbp": round(q.rate_gbp_per_kg * q.weight_kg, 2),
+        "revenue_gbp": row["revenue_gbp"],
         "submitted_by": q.user_email,
-        "status": "fired_to_forwarder",
-        "message": "Quote fired to forwarder (demo - no real submission)",
+        "status": row["status"],
+        "created_at": row["created_at"],
+        "message": "Quote persisted to Lakebase and fired to forwarder",
     }
 
 
