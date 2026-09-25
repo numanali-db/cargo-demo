@@ -1,7 +1,7 @@
 -- Cargo Yield Agent Demo - Catalog Setup
 -- Template: rendered by scripts/render.sh into build/sql/01_setup_catalog.sql
 
-CREATE CATALOG IF NOT EXISTS ${CATALOG} COMMENT 'Virgin Atlantic Cargo Yield Agent Demo';
+CREATE CATALOG IF NOT EXISTS ${CATALOG} COMMENT 'Northwind Air Cargo Yield Agent Demo';
 
 CREATE SCHEMA IF NOT EXISTS ${CATALOG}.cargo_bronze COMMENT 'Cargo demo - raw data feeds';
 CREATE SCHEMA IF NOT EXISTS ${CATALOG}.cargo_silver COMMENT 'Cleaned and enriched cargo data';

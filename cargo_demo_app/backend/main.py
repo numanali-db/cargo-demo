@@ -1,5 +1,5 @@
 """
-Virgin Atlantic Cargo Yield Agent — Databricks App backend
+Northwind Air Cargo Yield Agent — Databricks App backend
 
 Endpoints:
   GET  /api/health
@@ -35,7 +35,7 @@ AGENT_ENDPOINT = os.environ["AGENT_ENDPOINT"]
 # demo is shown ("last 30 days" => last 30 days of available data).
 DATA_TODAY = f"(SELECT MAX(flight_date) FROM {CATALOG}.cargo_silver.awb_enriched)"
 
-app = FastAPI(title="Virgin Atlantic Cargo Yield Agent")
+app = FastAPI(title="Northwind Air Cargo Yield Agent")
 
 
 @app.get("/api/health")

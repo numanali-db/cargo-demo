@@ -1,6 +1,6 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Virgin Atlantic Cargo Yield — Lakeflow Declarative Pipeline
+# MAGIC # Northwind Air Cargo Yield — Lakeflow Declarative Pipeline
 # MAGIC
 # MAGIC Bronze → Silver → Gold transforms for the Cargo Yield Agent demo.
 # MAGIC

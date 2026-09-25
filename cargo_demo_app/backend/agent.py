@@ -5,7 +5,7 @@ Pipeline:
   1. CapacityCheck       — Query flight capacity + committed load (Delta gold)
   2. YieldCalc           — Historical yield model + capacity-driven adjustment
   3. CompetitiveCheck    — Compare against scraped competitor rates
-  4. RulesRetrieval      — Vector Search over IATA + VAA handling rules
+  4. RulesRetrieval      — Vector Search over IATA + Northwind handling rules
   5. QuoteDrafting       — FMAPI (Claude Sonnet 4.6) drafts quote + rationale
 
 Each step adds to a structured `AgentTrace` so the UI can show explainability.
@@ -224,7 +224,7 @@ def step_rules_retrieval(rfq: dict) -> dict:
 def step_quote_drafting(rfq: dict, capacity: dict, yield_calc: dict, competitive: dict, rules: dict) -> dict:
     """Use FMAPI to draft the quote rationale."""
     rules_text = "\n\n".join([f"[{d['title']}]\n{d['content'][:400]}" for d in rules.get("documents", [])[:3]])
-    system = """You are Virgin Atlantic's senior cargo yield analyst. Your job is to recommend a quote for an inbound RFQ based on capacity, historical yield, competitive position, and handling rules. Be concise, factual, and quantitative. Always conclude with: (1) a recommended rate, (2) the rationale in 3-5 bullets referencing the data, (3) risks. Do not invent numbers. Quote only in GBP."""
+    system = """You are Northwind Air Cargo's senior cargo yield analyst. Your job is to recommend a quote for an inbound RFQ based on capacity, historical yield, competitive position, and handling rules. Be concise, factual, and quantitative. Always conclude with: (1) a recommended rate, (2) the rationale in 3-5 bullets referencing the data, (3) risks. Do not invent numbers. Quote only in GBP."""
 
     user = f"""## RFQ
 Forwarder: {rfq['forwarder_name']}
