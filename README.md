@@ -70,8 +70,7 @@ calibrated to Virgin Atlantic's **publicly reported** cargo footprint (~200K ton
 £236M revenue / 26K flights per year). No confidential or customer-private data is used.
 
 See [`docs/execution-evidence.md`](docs/execution-evidence.md) for live run outputs across
-all six stages, the business [`docs/fe-bar-deck.md`](docs/fe-bar-deck.md), and
-[`docs/ai-mindset.md`](docs/ai-mindset.md) for how AI was used to build this.
+all six stages, and the business [`docs/fe-bar-deck.md`](docs/fe-bar-deck.md).
 
 ## What's in this repo
 
