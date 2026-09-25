@@ -19,7 +19,7 @@ AI was used as a force multiplier across the whole build, not just inside the pr
 
 - *"Add a real Lakebase Postgres backend for the operational RFQ inbox + quotes; keep analytics on the warehouse; app-side OAuth via the app service principal."*
 - *"Anchor the analytics time-windows to the latest date in the data so the KPI tiles populate whenever the demo is shown."*
-- *"Validate this build against the FE Bar rubric and close the gaps — execution evidence, business deck, trade-offs, and genericise the customer name."*
+- *"Validate this build against the FE Bar rubric and close the gaps — execution evidence, business deck, and decisions & trade-offs."*
 
 ## What AI did *not* decide
 

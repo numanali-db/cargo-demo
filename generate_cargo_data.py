@@ -1,7 +1,7 @@
 """
-Northwind Air Cargo Yield Agent - Synthetic Data Generator
+Virgin Atlantic Cargo Yield Agent - Synthetic Data Generator
 
-Generates realistic cargo data calibrated to Northwind's actual footprint:
+Generates realistic cargo data calibrated to VAA's actual footprint:
 - 199K tonnes/year (FY2024 baseline)
 - 26,380 flights/year (FY2025)
 - £236M cargo revenue (FY2024)
@@ -264,7 +264,7 @@ for lane in LANES:
     for comp in COMPETITORS:
         for cmd in random.sample(COMMODITIES, k=6):
             base_rate = lane[4]
-            # Competitors are within +/- 15% of Northwind base rate
+            # Competitors are within +/- 15% of VAA base rate
             comp_rate = round(base_rate * cmd[3] * random.uniform(0.88, 1.12), 3)
             comp_rates.append({
                 "scrape_timestamp": dt.datetime.now() - dt.timedelta(hours=random.randint(1, 48)),

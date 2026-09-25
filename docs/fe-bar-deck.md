@@ -1,4 +1,4 @@
-# Northwind Air Cargo — Cargo Yield Agent
+# Virgin Atlantic — Cargo Yield Agent
 ### Turning every RFQ into a capacity-aware, margin-optimal quote in seconds
 
 *Business review deck. Audience: VP Cargo Revenue (executive sponsor) + Head of Yield / Cargo Data Lead (domain owner). Figures are synthetic, calibrated to public air-cargo benchmarks.*
@@ -7,7 +7,7 @@
 
 ## 1. The business problem
 
-Northwind Air Cargo runs a **~£250M cargo book** across ~26,000 long-haul flights a year. Revenue is made or lost one **RFQ (request-for-quote)** at a time:
+Virgin Atlantic runs a **~£236M cargo book** across ~26,000 long-haul flights a year. Revenue is made or lost one **RFQ (request-for-quote)** at a time:
 
 - A freight forwarder fires the same lane RFQ to every airline and books the first good rate back.
 - A **human yield analyst** answers each one by hand — pulling flight load factors from one system, historical rates from another, competitor intel from a third, and IATA handling rules from a PDF — then makes a judgement call.
@@ -26,7 +26,7 @@ Northwind Air Cargo runs a **~£250M cargo book** across ~26,000 long-haul fligh
 | **Capacity utilisation** | Priced "by gut" | Belly flown empty *or* premium given away |
 | **Analyst capacity** | ~80 RFQs/day ceiling | Can't scale with demand peaks |
 
-A **1–2% yield lift** on a £250M book is **£2.5–5M of pure margin per year** — no new aircraft, no capex.
+A **1–2% yield lift** on a £236M book is **£2.5–5M of pure margin per year** — no new aircraft, no capex.
 
 ---
 

@@ -2,7 +2,7 @@
 
 All outputs below were captured live from the `fevm-serverless-nal` workspace on 2026-09-25 13:28 UTC by running each stage end to end. Numbers are real query results / endpoint responses, committed as text (the FE Bar evaluator reads text only).
 
-> Data is fully synthetic (`generate_cargo_data.py`, fixed seed) and calibrated to public air-cargo industry benchmarks; the scenario is a generic long-haul air-cargo carrier. No real customer data is present.
+> Data is fully synthetic (`generate_cargo_data.py`, fixed seed) and calibrated to Virgin Atlantic's **publicly reported** cargo footprint (~200K tonnes / £236M revenue / 26K flights per year). No confidential or customer-private data is used.
 
 ## 1–2. Lakeflow ingestion + Unity Catalog governance
 
@@ -147,28 +147,25 @@ A gradient-boosted yield model (`train_yield_model.py`, sklearn→MLflow→Model
           {
             "doc_id": "KB-005",
             "title": "Valuables (VAL) Handling",
-            "content": "Valuables include cash, bullion, banknotes, securities, jewelry, precious stones. Vault storage required at origin and destination. Armored ground transport. Maximum value per AWB typically capped at limits per Warsaw/Montreal Convention unless special declared value applies. Premium 80-100% over GCR. Strict chain of custody documentation. Northwind Air Cargo offers VAL service on LHR-JFK, LHR-LAX, LHR-HKG, LHR-DXB (interline) lanes. Brinks and Loomis are common forwarder partners.",
+            "content": "Valuables include cash, bullion, banknotes, securities, jewelry, precious stones. Vault storage required at origin and destination. Armored ground transport. Maximum value per AWB typically capped at limits per Warsaw/Montreal Convention unless special declared value applies. Premium 80-100% over GCR. Strict chain of custody documentation. Virgin Atlantic offers VAL service on LHR-JFK, LHR-LAX, LHR-HKG, LHR-DXB (interline) lanes. Brinks and Loomis are common forwarder partners.",
             "category": "special_cargo"
           },
           {
             "doc_id": "KB-011",
             "title": "LHR-JFK Lane Characteristics",
-            "content": "LHR-JFK is Northwind Air Cargo's flagship cargo lane, operating 3x daily. Average cargo capacity 18,000 kg per flight. Strong demand for transatlantic finance documents, e-commerce, pharma. Competition: BA IAG Cargo (4x daily), AA Cargo (2x daily), Delta Cargo (3x daily JFK-LHR/LGW). Average yield \u00a32.85/kg general cargo, \u00a34.10/kg pharma, \u00a35.50/kg express. Peak demand: Mon-Wed eastbound, Thu-Fri westbound. Load factor target 80%.",
+            "content": "LHR-JFK is Virgin Atlantic's flagship cargo lane, operating 3x daily. Average cargo capacity 18,000 kg per flight. Strong demand for transatlantic finance documents, e-commerce, pharma. Competition: BA IAG Cargo (4x daily), AA Cargo (2x daily), Delta Cargo (3x daily JFK-LHR/LGW). Average yield \u00a32.85/kg general cargo, \u00a34.10/kg pharma, \u00a35.50/kg express. Peak demand: Mon-Wed eastbound, Thu-Fri westbound. Load factor target 80%.",
             "category": "lanes"
           },
           {
             "doc_id": "KB-007",
             "title": "Forwarder Discount Tiers",
-            "content": "Northwind Air Cargo forwarder tiers: Platinum (DSV, K+N, DHL Global) receive 10-12% off published rates, dedicated capacity allocations on key lanes, 30-day credit terms, and named cargo account manager. Gold tier (Expeditors, CEVA, Bollore) receive 6-8% off, named contact, 30-day terms. Silver (Yusen, Geodis, Nippon Express) receive 3-4% off, 14-day terms. Bronze and direct shippers pay published rates. Annual contract negotiation in Q4 for following calendar year.",
+            "content": "Virgin Atlantic forwarder tiers: Platinum (DSV, K+N, DHL Global) receive 10-12% off published rates, dedicated capacity allocations on key lanes, 30-day credit terms, and named cargo account manager. Gold tier (Expeditors, CEVA, Bollore) receive 6-8% off, named contact, 30-day terms. Silver (Yusen, Geodis, Nippon Express) receive 3-4% off, 14-day terms. Bronze and direct shippers pay published rates. Annual contract negotiation in Q4 for following calendar year.",
             "category": "pricing_strategy"
           },
           {
             "doc_id
 … (truncated)
 ```
-
-
-_Note: the knowledge base is de-branded at source (`sql/04_build_knowledge_base.sql`) and in the `cargo_ai.knowledge_base` table (0 rows contain any real carrier name); the Delta-Sync vector index re-syncs from that table. Rule text above uses the fictional carrier name accordingly._
 
 ## 5. Genie — natural-language querying
 

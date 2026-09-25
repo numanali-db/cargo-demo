@@ -317,7 +317,7 @@ class CargoYieldAgent(mlflow.pyfunc.PythonModel):
     @mlflow.trace(span_type="LLM", name="quote_drafting")
     def _quote_drafting(self, rfq, cap, yc, comp, rules):
         rules_text = "\\n\\n".join([f"[{d['title']}]\\n{d['content'][:400]}" for d in rules.get("documents", [])[:3]])
-        system = ("You are Northwind Air Cargo\\'s senior cargo yield analyst. Recommend a quote for an inbound RFQ "
+        system = ("You are Virgin Atlantic\\'s senior cargo yield analyst. Recommend a quote for an inbound RFQ "
                   "based on capacity, historical yield, ML model prediction, competitive position, and handling rules. "
                   "Be concise, factual, quantitative. Always conclude with: (1) a recommended rate, (2) the rationale "
                   "in 3-5 bullets referencing the data, (3) risks. Do not invent numbers. Quote only in GBP.")
