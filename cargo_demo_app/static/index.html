@@ -116,6 +116,10 @@ tr.selected { background: rgba(225,10,10,0.05); }
 .tag.premium { background: rgba(225,10,10,0.1); color: var(--va-red); }
 .tag.specialist { background: rgba(110,26,92,0.1); color: var(--va-purple); }
 .tag.urgent { background: var(--red); color: white; animation: pulse 2s infinite; }
+.tag.prio-high { background: var(--va-red); color: white; }
+.tag.prio-medium { background: #FEF3C7; color: #92400E; }
+.tag.prio-low { background: var(--gray-100); color: var(--gray-700); }
+.tag.prio-none { background: transparent; color: var(--gray-300); }
 @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.6 } }
 
 .detail-pane { display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; }
@@ -665,6 +669,7 @@ tr.selected { background: rgba(225,10,10,0.05); }
           <tr><td>Agent</td><td class="mono">MLflow PyFunc</td><td>cargo-yield-agent — 5-step pipeline with MLflow Tracing</td></tr>
           <tr><td>Retrieval</td><td class="mono">Vector Search</td><td>RAG over IATA + special cargo + lane briefs</td></tr>
           <tr><td>Reasoning</td><td class="mono">Foundation Model API</td><td>Claude Sonnet 4.6 — rationale + quote drafting</td></tr>
+          <tr><td>Decisioning</td><td class="mono">ai_decide()</td><td>SQL AI function — governed inbox triage (High/Medium/Low priority)</td></tr>
           <tr><td>UI</td><td class="mono">Databricks Apps</td><td>This cockpit — FastAPI + React, thin client over the agent</td></tr>
           <tr><td>Self-serve</td><td class="mono">AI/BI Genie</td><td>Natural-language analytics for cargo sales team</td></tr>
         </tbody>
@@ -1198,6 +1203,16 @@ async function loadKPIs() {
   } catch (e) { console.error(e); }
 }
 
+// Priority badge for the RFQ inbox — populated by ai_decide() server-side.
+function prioBadge(p, conf) {
+  if (!p) return '<span class="tag prio-none" title="Not triaged by ai_decide()">&mdash;</span>';
+  const cls = 'prio-' + p.toLowerCase();
+  const title = (conf != null)
+    ? `ai_decide() priority — ${(conf * 100).toFixed(0)}% confidence`
+    : 'ai_decide() priority';
+  return `<span class="tag ${cls}" title="${title}">${p}</span>`;
+}
+
 async function loadRFQs() {
   try {
     const data = await api('/api/rfqs');
@@ -1211,10 +1226,11 @@ async function loadRFQs() {
     }
     container.innerHTML = `
       <table>
-        <thead><tr><th>Received</th><th>Forwarder</th><th>Lane</th><th>Commodity</th><th style="text-align:right">Weight</th><th>Flight</th></tr></thead>
+        <thead><tr><th>Priority</th><th>Received</th><th>Forwarder</th><th>Lane</th><th>Commodity</th><th style="text-align:right">Weight</th><th>Flight</th></tr></thead>
         <tbody>
           ${data.rfqs.map(r => `
             <tr data-id="${r.rfq_id}" class="rfq-row ${r.rfq_id === selectedRfqId ? 'selected' : ''}">
+              <td>${prioBadge(r.priority, r.priority_confidence)}</td>
               <td><span class="mono" style="color:var(--gray-500);font-size:11px">${(r.received_at||'').substring(5,16).replace('T',' ')}</span></td>
               <td><strong>${r.forwarder_name}</strong></td>
               <td class="mono">${r.lane}</td>

@@ -16,6 +16,7 @@ Endpoints:
 import os
 import json
 import time
+from typing import Any
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
@@ -36,6 +37,105 @@ AGENT_ENDPOINT = os.environ["AGENT_ENDPOINT"]
 DATA_TODAY = f"(SELECT MAX(flight_date) FROM {CATALOG}.cargo_silver.awb_enriched)"
 
 app = FastAPI(title="Virgin Atlantic Cargo Yield Agent")
+
+
+# =============================================================================
+# RFQ triage — ai_decide() priority scoring
+# =============================================================================
+# `ai_decide()` is a Databricks SQL AI function (Beta) that turns each RFQ's
+# semi-structured state — commodity, handling flags, lane, deadline, and the
+# free-text forwarder notes — into a governed High / Medium / Low priority with
+# a confidence score, in a single SQL statement over the whole inbox. It runs on
+# the SQL warehouse (ai_decide is not available in Lakebase Postgres), and the
+# question definition is a constant shared by every row while `state` varies per
+# row — exactly as the function requires. Results are cached per rfq_id so repeat
+# inbox loads are instant, and any failure degrades gracefully (the inbox still
+# renders — just without priorities — if ai_decide isn't enabled in a workspace).
+
+# Constant question definition — identical for every row (ai_decide requires this).
+# Note: wording avoids apostrophes so it inlines cleanly as a SQL string literal.
+_TRIAGE_QUESTIONS = json.dumps({
+    "priority": {
+        "type": "choice",
+        "instructions": (
+            "Assign a handling priority for this inbound air-cargo RFQ awaiting a quote. "
+            "Weigh deadline urgency from the customer notes, special or temperature-controlled "
+            "handling needs, the strategic value of a repeat or high-volume forwarder, and any "
+            "competitive-bid situation where we risk losing the booking to a named competitor."
+        ),
+        "criteria": {
+            "High": (
+                "Time-critical such as a same-day or end-of-day deadline, an active competitive "
+                "bid we could lose, or high-value special handling like pharma cold chain, "
+                "valuables, or live animals."
+            ),
+            "Medium": (
+                "A repeat or strategic forwarder, moderate handling needs, or a same-week "
+                "deadline without acute pressure."
+            ),
+            "Low": "Routine general cargo with no special handling and no deadline pressure.",
+        },
+    }
+})
+
+_PRIORITY_RANK = {"High": 0, "Medium": 1, "Low": 2}
+_PRIORITY_CACHE: dict[str, dict] = {}
+
+
+def _sql_lit(s: Any) -> str:
+    """Escape a value for inlining as a SQL single-quoted string literal."""
+    return "'" + str(s).replace("'", "''") + "'"
+
+
+def _triage_priority(rfqs: list[dict]) -> None:
+    """Attach `priority` + `priority_confidence` to each RFQ in place.
+
+    Runs one batched ai_decide() statement on the SQL warehouse for any RFQ not
+    already cached. Never raises — on failure the inbox still renders, just
+    without priorities.
+    """
+    pending = [r for r in rfqs if r["rfq_id"] not in _PRIORITY_CACHE]
+    if pending:
+        values = []
+        for r in pending:
+            state = {
+                "forwarder": r.get("forwarder_name"),
+                "commodity": r.get("commodity_name") or r.get("commodity_code"),
+                "handling_tier": r.get("handling_tier"),
+                "lane": r.get("lane"),
+                "weight_kg": r.get("requested_weight_kg"),
+                "special_handling": r.get("special_handling"),
+                "temp_controlled": r.get("temp_controlled"),
+                "flight_date": str(r.get("flight_date") or ""),
+                "ready_date": str(r.get("ready_date") or ""),
+                "notes": r.get("notes") or "",
+            }
+            values.append(f"({_sql_lit(r['rfq_id'])}, {_sql_lit(json.dumps(state))})")
+        stmt = f"""
+          SELECT t.rfq_id,
+                 t.d:response.answers.priority.choice::string     AS priority,
+                 t.d:response.answers.priority.confidence::double AS confidence,
+                 t.d:error_message::string                        AS error_message
+          FROM (
+            SELECT rfq_id,
+                   ai_decide(state, {_sql_lit(_TRIAGE_QUESTIONS)}, map('version', '1.0')) AS d
+            FROM (VALUES {', '.join(values)}) AS v(rfq_id, state)
+          ) t
+        """
+        try:
+            for row in query(stmt):
+                _PRIORITY_CACHE[row["rfq_id"]] = {
+                    "priority": row.get("priority"),
+                    "priority_confidence": row.get("confidence"),
+                }
+        except Exception as e:
+            # ai_decide is Beta / may not be enabled in every workspace — degrade gracefully.
+            print(f"[triage] ai_decide unavailable, serving inbox without priorities: {str(e)[:300]}")
+
+    for r in rfqs:
+        t = _PRIORITY_CACHE.get(r["rfq_id"], {})
+        r["priority"] = t.get("priority")
+        r["priority_confidence"] = t.get("priority_confidence")
 
 
 @app.get("/api/health")
@@ -61,6 +161,12 @@ def list_rfqs(status: str = "pending_quote", limit: int = 50):
       ORDER BY r.received_at DESC
       LIMIT %s
     """, (status, limit))
+
+    # Governed triage: ai_decide() tags each RFQ High/Medium/Low, then surface the
+    # hottest to the top of the inbox (recency breaks ties within a priority band).
+    _triage_priority(rows)
+    rows.sort(key=lambda r: (_PRIORITY_RANK.get(r.get("priority"), 3),))
+
     return {"count": len(rows), "rfqs": rows}
 
 
