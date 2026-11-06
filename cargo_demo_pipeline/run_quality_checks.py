@@ -17,8 +17,8 @@ checks = [
      f"SELECT COUNT(*) AS n FROM {CATALOG}.cargo_gold.lane_monthly_summary"),
     ("at least 10 distinct forwarders",
      f"SELECT COUNT(*) AS n FROM {CATALOG}.cargo_gold.forwarder_performance"),
-    ("at least 1 month of recent revenue",
-     f"SELECT COUNT(*) AS n FROM {CATALOG}.cargo_gold.lane_monthly_summary WHERE month >= date_add(current_date(), -90)"),
+    ("at least 1 month of recent revenue (relative to latest data)",
+     f"SELECT COUNT(*) AS n FROM {CATALOG}.cargo_gold.lane_monthly_summary WHERE month >= (SELECT date_add(MAX(month), -90) FROM {CATALOG}.cargo_gold.lane_monthly_summary)"),
     ("competitor benchmark populated",
      f"SELECT COUNT(*) AS n FROM {CATALOG}.cargo_gold.competitor_benchmark WHERE our_avg_rate IS NOT NULL"),
 ]

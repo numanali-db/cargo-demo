@@ -214,9 +214,13 @@ def load_factor_trends():
     table_properties={"quality": "gold"},
 )
 def competitor_benchmark():
+    # Anchor the 90-day window to the latest flight in the data, not CURRENT_DATE:
+    # the synthetic dataset is static, so a wall-clock window goes empty over time.
+    enriched = dlt.read("awb_enriched")
+    data_today = enriched.agg(F.max("flight_date").alias("data_today"))
     our_rates = (
-        dlt.read("awb_enriched")
-        .filter(F.col("flight_date") >= F.date_add(F.current_date(), -90))
+        enriched.crossJoin(data_today)
+        .filter(F.col("flight_date") >= F.date_add(F.col("data_today"), -90))
         .groupBy("lane", "origin_iata", "destination_iata", "commodity_code")
         .agg(F.avg("rate_gbp_per_kg").alias("our_avg_rate"))
     )
